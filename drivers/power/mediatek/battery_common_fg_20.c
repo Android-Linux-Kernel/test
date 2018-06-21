@@ -2493,7 +2493,7 @@ static void mt_battery_thermal_check(void)
 				    "[Battery] In thermal_test_mode , Tbat=%d\n",
 				    BMT_status.temperature);
 		}
-#if 0//#if defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
+#if defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
 		/* ignore default rule */
 #else
 		if (BMT_status.temperature >= 60) {

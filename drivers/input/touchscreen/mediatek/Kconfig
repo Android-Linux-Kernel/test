@@ -24,15 +24,6 @@ config TOUCHSCREEN_MTK
 
 source "drivers/input/touchscreen/mediatek/GT1151/Kconfig"
 
-config TOUCHSCREEN_MTK_FT3X27
-	bool "FT3327 for Mediatek package"
-	default n
-	help
-	  Say Y here if you have FT93327 touch panel.
-
-	  If unsure, say N.
-
-source "drivers/input/touchscreen/mediatek/ft3x27/Kconfig"
 
 config TOUCHSCREEN_MTK_GT1151TB
 	bool "GT1151 for Mediatek package"
@@ -47,6 +38,26 @@ config TOUCHSCREEN_MTK_GT1151TB
 
 source "drivers/input/touchscreen/mediatek/GT1151TB/Kconfig"
 
+config TOUCHSCREEN_MTK_GT928
+	tristate "GT928 Touchscreen"
+	help
+	  Say Y here if you have Goodix GT928 touchscreen,
+	  connected to your system.
+	  If unsure, say N.
+	  To compile this driver as a module, choose M here.
+
+config TOUCHSCREEN_MTK_GT9XXTB_HOTKNOT
+	bool "GT9XXTB hotknot for Mediatek package"
+	default n
+	help
+	  Say Y here if you have GT9XXTB hotknot touch panel.
+
+	  If unsure, say N.
+
+	  To compile this dirver as a module, choose M here: the
+	  module will be called.
+
+source "drivers/input/touchscreen/mediatek/GT9XXTB_hotknot/Kconfig"
 
 config TOUCHSCREEN_MTK_GT9XX_HOTKNOT
 	bool "GT9XX hotknot for Mediatek package"
@@ -88,6 +99,19 @@ config TOUCHSCREEN_MTK_SYNAPTICS_I2C_RMI4
 
 source "drivers/input/touchscreen/mediatek/synaptics_i2c_rmi4/Kconfig"
 
+config TOUCHSCREEN_MTK_GT910
+	bool "GT910 for Mediatek package"
+	default n
+	help
+	  Say Y here if you have GT910 touch panel.
+
+	  If unsure, say N.
+
+	  To compile this dirver as a module, choose M here: the
+	  module will be called.
+
+source "drivers/input/touchscreen/mediatek/GT910/Kconfig"
+
 config TOUCHSCREEN_MTK_GT9XX_HOTKNOT_SCP
 	bool "GT9XX_HOTKNOT_SCP for Mediatek package"
 	default n
@@ -101,18 +125,19 @@ config TOUCHSCREEN_MTK_GT9XX_HOTKNOT_SCP
 
 source "drivers/input/touchscreen/mediatek/GT9XX_hotknot_scp/Kconfig"
 
-config TOUCHSCREEN_MTK_H371_GT915L
-	bool "H371_GT915L for Mediatek package"
+config TOUCHSCREEN_MTK_GT911
+	bool "GT911 for Mediatek package"
 	default n
 	help
-	  Say Y here if you have H371_GT915L touch panel.
+	  Say Y here if you have GT911 touch panel.
 
 	  If unsure, say N.
 
 	  To compile this dirver as a module, choose M here: the
 	  module will be called.
 
-source "drivers/input/touchscreen/mediatek/H371_GT915L/Kconfig"
+source "drivers/input/touchscreen/mediatek/GT911/Kconfig"
+
 config TOUCHSCREEN_MTK_FT5X0X
 	bool "FT5X0X for Mediatek package"
 	default n
@@ -126,10 +151,38 @@ config TOUCHSCREEN_MTK_FT5X0X
 
 source "drivers/input/touchscreen/mediatek/ft5x0x/Kconfig"
 
+## ft5406 tp add for A158 ----qiumeng@wind-mobi.com begin at 20161109
+config TOUCHSCREEN_MTK_FT5406
+	bool "FT5X0X for Mediatek package"
+	default n
+	help
+	  Say Y here if you have FT5406 touch panel.
+
+	  If unsure, say N.
+
+	  To compile this dirver as a module, choose M here: the
+	  module will be called.
+
+source "drivers/input/touchscreen/mediatek/ft5406/Kconfig"
+## ft5406 tp add for A158 ----qiumeng@wind-mobi.com end at 20161109
+
 config TOUCHSCREEN_MTK_SYNAPTICS_3320_50
 	bool "Synaptics 5.0inch for Mediatek package"
     default n
 
+
+config TOUCHSCREEN_MTK_GT9271TB_HOTKNOT
+	bool "GT911 for Mediatek package"
+	default n
+	help
+	  Say Y here if you have GT9271TB_HOTKNOT touch panel.
+
+	  If unsure, say N.
+
+	  To compile this dirver as a module, choose M here: the
+	  module will be called.
+
+source "drivers/input/touchscreen/mediatek/GT9271TB_hotknot/Kconfig"
 
 config TOUCHSCREEN_UNIFIED_DRIVER_4
 	bool "LGE Unified driver Ver4.0"

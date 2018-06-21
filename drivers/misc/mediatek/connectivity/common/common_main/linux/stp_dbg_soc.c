@@ -484,6 +484,8 @@ UINT32 stp_dbg_soc_read_debug_crs(ENUM_CONNSYS_DEBUG_CR cr)
 		return CONSYS_REG_READ(consys_dbg_cr_base + CONSYS_DBG_CR1_OFFSET);
 	case CONNSYS_DEBUG_CR2:
 		return CONSYS_REG_READ(consys_dbg_cr_base + CONSYS_DBG_CR2_OFFSET);
+	case CONNSYS_DEBUG_CR3:
+		return CONSYS_REG_READ(consys_dbg_cr_base + CONSYS_DBG_CR3_OFFSET);
 	default:
 		return 0;
 	}

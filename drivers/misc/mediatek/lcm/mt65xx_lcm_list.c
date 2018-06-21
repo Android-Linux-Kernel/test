@@ -33,26 +33,29 @@ LCM_DSI_MODE_CON lcm_dsi_mode;
 #define LCD_DEBUG(fmt, args...)  pr_debug("[KERNEL/LCM]"fmt, ##args)
 #endif
 
-extern LCM_DRIVER ili9881c_hd720_dsi_vdo_lcm_drv;
-extern LCM_DRIVER ili9881c_hd720_dsi_vdo_cmi_lcm_drv;
-extern LCM_DRIVER hx8394f_hd720_dsi_vdo_cpt_lcm_drv;
-extern LCM_DRIVER ili9881c_hd720_dsi_vdo_auo5c_lcm_drv;
 LCM_DRIVER *lcm_driver_list[] = {
-#if defined(ILI9881C_HD720_DSI_VDO)
-	&ili9881c_hd720_dsi_vdo_lcm_drv,
-#endif
-#if defined(ILI9881C_HD720_DSI_VDO_CMI)
-	&ili9881c_hd720_dsi_vdo_cmi_lcm_drv,
+/*******************lcm add ---qiumeng@wind.mobi.com start at 20170425******************************/
+#if defined(NT35512_CMI_720P_OUFEIGUANG)
+		&nt35512_cmi_720p_oufeiguang_drv,
 #endif
 
-#if defined(HX8394F_HD720_DSI_VDO_CPT)
-	&hx8394f_hd720_dsi_vdo_cpt_lcm_drv,
+#if defined(ILI9881_HD720_DSI_VDO_TM)
+	    &ili9881_hd720_dsi_vdo_tm_lcm_drv,
 #endif
 
-#if defined(ILI9881C_HD720_DSI_VDO_AUO5C)
-	&ili9881c_hd720_dsi_vdo_auo5c_lcm_drv,
+#if defined(ILI9881_HD720_DSI_VDO_DJ)
+	&ili9881_hd720_dsi_vdo_dj_lcm_drv,
 #endif
+//liujinzhou@wind-mobi.com add at 20170705 begin
+#if defined(ILI9881_HD720_DSI_VDO_HS)
+	&ili9881_hd720_dsi_vdo_hs_lcm_drv,
+#endif
+//liujinzhou@wind-mobi.com add at 20170705 end
+/*******************lcm add ---qiumeng@wind.mobi.com end at 20170425******************************/
 
+#if defined(OTM1284A_HD720_DSI_VDO_TM)
+	&otm1284a_hd720_dsi_vdo_tm_lcm_drv,
+#endif
 #if defined(OTM1285A_HD720_DSI_VDO_TM)
 	&otm1285a_hd720_dsi_vdo_tm_lcm_drv,
 #endif
@@ -1003,10 +1006,6 @@ LCM_DRIVER *lcm_driver_list[] = {
 
 #if defined(NT35695_FHD_DSI_VDO_TRULY_NT50358_720P)
 	&nt35695_fhd_dsi_vdo_truly_nt50358_720p_lcm_drv,
-#endif
-
-#if defined(AUO_WUXGA_DSI_VDO)
-	&auo_wuxga_dsi_vdo_lcm_drv,
 #endif
 };
 

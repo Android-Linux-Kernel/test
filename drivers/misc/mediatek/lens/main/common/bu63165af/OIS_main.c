@@ -1,16 +1,12 @@
-/*
- * Copyright (C) Rohm Co.,Ltd. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
- */
-
+/* /////////////////////////////////////////////////////////////////////////// */
+/* File Name    : OIS_main.c */
+/* Function             : Main control function runnning on ISP. */
+/* ( But Just for example ) */
+/* Rule         : Use TAB 4 */
+/*  */
+/* Copyright(c) Rohm Co.,Ltd. All rights reserved */
+/*  */
+/***** ROHM Confidential ***************************************************/
 #ifndef OIS_MAIN_C
 #define OIS_MAIN_C
 #endif

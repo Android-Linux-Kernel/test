@@ -72,3 +72,4 @@ class PowerObj(ModuleObj):
 
     def fill_dtsiFile(self):
         return ''
+

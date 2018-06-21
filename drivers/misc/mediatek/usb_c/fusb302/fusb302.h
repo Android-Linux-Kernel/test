@@ -1,15 +1,36 @@
-/*
-* Copyright (C) 2016 MediaTek Inc.
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License version 2 as
-* published by the Free Software Foundation.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See http://www.gnu.org/licenses/gpl-2.0.html for more details.
-*/
+/*********************************************************************
+ * FileName:        FUSB300.h
+ * Dependencies:    See INCLUDES section below
+ * Processor:       PIC32
+ * Compiler:        XC32
+ * Company:         Fairchild Semiconductor
+ *
+ * Author           Date          Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * M. Smith         12/04/2014    Initial Version
+ *
+ *
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * Software License Agreement:
+ *
+ * The software supplied herewith by Fairchild Semiconductor (the “Company?
+ * is supplied to you, the Company's customer, for exclusive use with its
+ * USB Type C / USB PD products.  The software is owned by the Company and/or
+ * its supplier, and is protected under applicable copyright laws.
+ * All rights are reserved. Any use in violation of the foregoing restrictions
+ * may subject the user to criminal sanctions under applicable laws, as well
+ * as to civil liability for the breach of the terms and conditions of this
+ * license.
+ *
+ * THIS SOFTWARE IS PROVIDED IN AN “AS IS?CONDITION. NO WARRANTIES,
+ * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+ * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+ * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ *
+ ********************************************************************/
 
 #ifndef FUSB300_H
 #define	FUSB300_H

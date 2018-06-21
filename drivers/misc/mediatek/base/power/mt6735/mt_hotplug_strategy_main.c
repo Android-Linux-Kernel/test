@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2016 MediaTek Inc.
+ * Copyright (c) 2015 MediaTek Inc.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  */
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -357,7 +358,7 @@ static int hps_resume(struct device *dev)
 	/* In order to fast screen on, power on extra little
 	   CPU to serve system resume. */
 	little_cpu_num_resume = 4;
-	for (cpu = hps_ctxt.little_cpu_id_min; cpu <= little_cpu_num_resume; cpu++) {
+	for (cpu = hps_ctxt.little_cpu_id_min; cpu < little_cpu_num_resume; cpu++) {
 		if (!cpu_online(cpu)) {
 			cpu_up(cpu);
 		}

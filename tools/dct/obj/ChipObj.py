@@ -5,7 +5,6 @@ import os, sys
 import xml.dom.minidom
 
 from GpioObj import GpioObj
-from GpioObj import GpioObj_whitney
 from EintObj import EintObj
 from AdcObj import AdcObj
 from ClkObj import ClkObj
@@ -26,7 +25,7 @@ para_map = {'adc':['adc_h', 'adc_dtsi'],\
             'clk':['clk_buf_h', 'clk_buf_dtsi'],\
             'eint':['eint_h', 'eint_dtsi'],\
             'gpio':['gpio_usage_h', 'gpio_boot_h', 'gpio_dtsi', 'scp_gpio_usage_h', 'pinfunc_h', \
-                    'pinctrl_h', 'gpio_usage_mapping_dtsi'],\
+                    'pinctrl_h', 'gpio_usage_mapping_dtsi', 'gpio_usage_mapping_dtsi'],\
             'i2c':['i2c_h', 'i2c_dtsi'],\
             'md1_eint':['md1_eint_h', 'md1_eint_dtsi'],\
             'kpd':['kpd_h', 'kpd_dtsi'],\
@@ -59,9 +58,6 @@ class ChipObj:
             return False
 
         self.__objs[tag] = obj
-
-    def refresh_eintGpioMap(self):
-        self.__objs['eint'].set_gpioObj(self.__objs['gpio'])
 
     def append_obj(self, tag, obj):
         if tag in self.__objs.keys():
@@ -136,15 +132,11 @@ class ChipObj:
 
 
     def gen_spec(self, paras):
-        # if cmp(paras[0], 'cust_dtsi') == 0:
-            # self.gen_custDtsi()
-            # return True
+        if cmp(paras[0], 'cust_dtsi') == 0:
+            self.gen_custDtsi()
+            return True
 
         for para in paras:
-            if cmp(para, 'cust_dtsi') == 0:
-                self.gen_custDtsi()
-                continue
-
             idx = 0
             name = ''
             if para.strip() != '':
@@ -160,8 +152,8 @@ class ChipObj:
                 obj.gen_spec(para)
                 log(LogLevel.info, 'Generate %s file successfully!' %(para))
             else:
-                log(LogLevel.warn, '%s can not be recognized!' %(para))
-                # sys.exit(-1)
+                log(LogLevel.error, '%s can not be recognized!' %(para))
+                sys.exit(-1)
 
         return True
 
@@ -251,19 +243,6 @@ class Rushmore(ChipObj):
     def generate(self, paras):
         return ChipObj.generate(self, paras)
 
-class Whitney(ChipObj):
-    def __init__(self, dws_path, gen_path):
-        ChipObj.__init__(self, dws_path, gen_path)
 
-    def init_objs(self):
-        ChipObj.init_objs(self)
-        ChipObj.replace_obj(self, 'gpio', GpioObj_whitney())
-        ChipObj.refresh_eintGpioMap(self)
 
-    def parse(self):
-        log(LogLevel.info, 'Whitney parse')
-        return ChipObj.parse(self)
-
-    def generate(self, paras):
-        return ChipObj.generate(self, paras)
 

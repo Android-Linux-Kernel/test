@@ -2816,7 +2816,7 @@ void fgauge_algo_run(void)
 	}
 
 /* 5. Logging */
-	bm_print(BM_LOG_CRTI,
+	pr_err(
 		 "[FGADC] %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
 		 gFG_Is_Charging, gFG_current, gFG_columb, gFG_voltage, gFG_capacity_by_v,
 		 gFG_capacity_by_c, gFG_capacity_by_c_init, gFG_BATT_CAPACITY,

@@ -35,9 +35,6 @@ else
                     ifeq ($(CONFIG_MTK_FAN5405_SUPPORT),y)
                         obj-$(CONFIG_MTK_SMART_BATTERY) += fan5405.o charging_hw_fan5405.o
                     else
-                        ifeq ($(CONFIG_MTK_SM5414_SUPPORT),y)
-                            obj-$(CONFIG_MTK_SMART_BATTERY) += sm5414.o charging_hw_sm5414.o
-                        else                    
                          ifeq ($(CONFIG_MTK_RT9536_SUPPORT),y)
                              obj-$(CONFIG_MTK_SMART_BATTERY) += rt9536.o charging_hw_rt9536.o
                          else
@@ -47,5 +44,4 @@ else
                endif
           endif
      endif
-endif
 endif

@@ -1,18 +1,24 @@
-/* BMA150 motion sensor driver
+/* linux/drivers/hwmon/adxl345.c
  *
+ * (C) Copyright 2008
+ * MediaTek <www.mediatek.com>
  *
+ * BMA150 driver for MT6516
  *
- * This software is licensed under the terms of the GNU General Public
- * License version 2, as published by the Free Software Foundation, and
- * may be copied, distributed, and modified under those terms.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  BMA150
  */
-
 #ifndef BMA250_H
 #define BMA250_H
 
@@ -20,7 +26,7 @@
 
 #define BMA250_I2C_SLAVE_WRITE_ADDR		0x30
 
-/* BMA222 Register Map  (Please refer to BMA150 Specifications) */
+	 /* BMA222 Register Map  (Please refer to BMA150 Specifications) */
 #define BMA250_REG_DEVID				0x00
 #define BMA250_FIXED_DEVID			0x03
 #define BMA250E_FIXED_DEVID			0xF9

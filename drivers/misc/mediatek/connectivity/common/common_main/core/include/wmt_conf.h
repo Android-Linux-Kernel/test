@@ -32,6 +32,7 @@
 */
 #define CUST_CFG_WMT "WMT.cfg"
 #define CUST_CFG_WMT_SOC "WMT_SOC.cfg"
+#define CUST_CFG_WMT_PREFIX "/vendor/firmware/"
 
 /*******************************************************************************
 *                    E X T E R N A L   R E F E R E N C E S

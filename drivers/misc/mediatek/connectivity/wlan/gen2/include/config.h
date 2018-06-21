@@ -113,7 +113,9 @@
 
 #define CFG_SUPPORT_PERSIST_NETDEV		0	/* create NETDEV when system bootup */
 
-#define CFG_FORCE_USE_20BW			1
+//remove wifi N channel restrictions for A158---qiumeng@wind-mobi.com 20161227 begin
+#define CFG_FORCE_USE_20BW			0  //1
+//remove wifi N channel restrictions for A158---qiumeng@wind-mobi.com 20161227 end
 
 #define CFG_SUPPORT_RN				1
 /*------------------------------------------------------------------------------
@@ -705,7 +707,6 @@
 
 #define CFG_SUPPORT_WFD_COMPOSE_IE          1
 
-#define CFG_SUPPORT_CPU_BOOST			0
 /*------------------------------------------------------------------------------
  * Flags of Packet Lifetime Profiling Mechanism
  *------------------------------------------------------------------------------

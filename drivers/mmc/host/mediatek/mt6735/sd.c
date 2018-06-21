@@ -2367,8 +2367,8 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
 
 	}
 
-	pr_err("msdc%d Set<%dK> src:<%dK> sclk:<%dK> timing<%d> mode:%d div:%d\n",
-	       host->id, hz / 1000, hclk / 1000, sclk / 1000, timing, mode, div);
+	/*pr_err("msdc%d Set<%dK> src:<%dK> sclk:<%dK> timing<%d> mode:%d div:%d\n",
+	       host->id, hz / 1000, hclk / 1000, sclk / 1000, timing, mode, div);*/
 
 	msdc_irq_restore(flags);
 }

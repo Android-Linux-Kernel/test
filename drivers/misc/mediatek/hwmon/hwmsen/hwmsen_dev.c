@@ -1,16 +1,8 @@
 /*
-* Copyright (C) 2016 MediaTek Inc.
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License version 2 as
-* published by the Free Software Foundation.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See http://www.gnu.org/licenses/gpl-2.0.html for more details.
+* Copyright(C)2014 MediaTek Inc.
+* Modification based on code covered by the below mentioned copyright
+* and/or permission notice(S).
 */
-
 
 #include <linux/interrupt.h>
 #include <linux/miscdevice.h>
@@ -602,6 +594,12 @@ static int hwmsen_enable(struct hwmdev_object *obj, int sensor, int enable)
 
 	sensor_type = 1LL << sensor;
 
+
+	if (sensor > MAX_ANDROID_SENSOR_NUM || sensor < 0) {
+		HWM_ERR("handle %d!\n", sensor);
+		return -EINVAL;
+	}
+
 	if (!obj) {
 		HWM_ERR("hwmdev obj pointer is NULL!\n");
 		return -EINVAL;
@@ -616,7 +614,6 @@ static int hwmsen_enable(struct hwmdev_object *obj, int sensor, int enable)
 	}
 	mutex_lock(&obj->dc->lock);
 	cxt = obj->dc->cxt[sensor];
-
 
 	if (enable == 1) {
 		/*{@for mt6582 blocking issue work around*/
@@ -720,6 +717,11 @@ static int hwmsen_enable_nodata(struct hwmdev_object *obj, int sensor, int enabl
 	HWM_FUN(f);
 	sensor_type = 1LL << sensor;
 
+	if (sensor > MAX_ANDROID_SENSOR_NUM || sensor < 0) {
+		HWM_ERR("handle %d!\n", sensor);
+		return -EINVAL;
+	}
+
 	if (NULL == obj) {
 		HWM_ERR("hwmdev obj pointer is NULL!\n");
 		return -EINVAL;
@@ -777,6 +779,11 @@ static int hwmsen_set_delay(int delay, int handle)
 {
 	int err = 0;
 	struct hwmsen_context *cxt = NULL;
+
+	if (handle > MAX_ANDROID_SENSOR_NUM || handle < 0) {
+		HWM_ERR("handle %d!\n", handle);
+		return -EINVAL;
+	}
 
 	if (handle > MAX_ANDROID_SENSOR_NUM) {
 		HWM_ERR("handle %d!\n", handle);

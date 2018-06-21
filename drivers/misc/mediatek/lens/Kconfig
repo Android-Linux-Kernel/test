@@ -136,6 +136,35 @@ config MTK_LENS_DW9718AF_SUPPORT
     lens driver for the camera sensor module
     Set as y if the driver is used in this project
 
+##luminjie@wind-mobi.com 20170613 begin
+config MTK_LENS_DW9718AF_QT_SUPPORT
+  bool "DW9718AF_QT Lens Driver"
+  default n
+  help
+    DW9718AF_QT Lens Driver
+    This config is used to enable the corresponding
+    lens driver for the camera sensor module
+    Set as y if the driver is used in this project
+	
+config MTK_LENS_DW9718AF_HLT_SUPPORT
+  bool "DW9718AF_HLT Lens Driver"
+  default n
+  help
+    DW9718AF_HLT Lens Driver
+    This config is used to enable the corresponding
+    lens driver for the camera sensor module
+    Set as y if the driver is used in this project
+
+config MTK_LENS_DW9718AF_BLX_SUPPORT
+  bool "DW9718AF_BLX Lens Driver"
+  default n
+  help
+    DW9718AF_BLX Lens Driver
+    This config is used to enable the corresponding
+    lens driver for the camera sensor module
+    Set as y if the driver is used in this project
+##luminjie@wind-mobi.com 20170613 end
+
 config MTK_LENS_DW9714AF_SUPPORT
   bool "DW9714AF Lens Driver"
   default n
@@ -144,15 +173,6 @@ config MTK_LENS_DW9714AF_SUPPORT
     This config is used to enable the corresponding
     lens driver for the camera sensor module
     Set as y if the driver is used in this project
-   
-config MTK_LENS_DW9800AF_SUPPORT
-  bool "DW9800AF Lens Driver"
-  default n
-  help
-    DW9714AF Lens Driver
-    This config is used to enable the corresponding
-    lens driver for the camera sensor module
-    Set as y if the driver is used in this project    
 
 config MTK_LENS_DW9714A_SUPPORT
   bool "DW9714A Lens Driver"

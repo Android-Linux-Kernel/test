@@ -186,10 +186,7 @@ int sdcardfs_interpose(struct dentry *dentry, struct super_block *sb,
 	lower_inode = lower_path->dentry->d_inode;
 	lower_sb = sdcardfs_lower_super(sb);
 
-	if (!dentry)
-		goto out;
-
-	if (!dentry->d_fsdata) {
+	if (dentry && !dentry->d_fsdata) {
 		pr_err("sdcardfs: %s: dentry %p d_fsdata absent\n", __func__, dentry);
 		err = -ENOENT;
 		goto out;

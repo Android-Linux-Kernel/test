@@ -30,14 +30,9 @@
 #include <linux/io.h>
 #include <linux/sort.h>
 #include <linux/mm.h>
-#include <linux/memblock.h>
-#ifdef MTK_AEE_FEATURE
-#include <mt-plat/aee.h>
-#endif
 
 #define MTK_MEMCFG_SIMPLE_BUFFER_LEN 16
 #define MTK_MEMCFG_LARGE_BUFFER_LEN (2048)
-
 
 struct mtk_memcfg_info_buf {
 	unsigned long max_len;
@@ -109,6 +104,40 @@ void mtk_memcfg_write_memory_layout_info(int type, const char *name, unsigned lo
 }
 
 static unsigned long mtk_memcfg_late_warning_flag;
+
+void mtk_memcfg_merge_memblock_record(void)
+{
+	static int memblock_is_cal;
+	int i = 0, j = 0, n = 0;
+	struct memblock_stack_trace *trace, *next;
+
+	if (memblock_is_cal == 0) {
+		i = 0;
+		while (i < memblock_count) {
+			trace = &memblock_stack_trace[i];
+			for (j = i + 1; j < memblock_count; j++) {
+				next = &memblock_stack_trace[j];
+				next->merge = 1;
+				if (trace->trace.nr_entries != next->trace.nr_entries) {
+					next->merge = 0;
+					break;
+				}
+				for (n = 0; n < trace->trace.nr_entries; n++) {
+					if (trace->addrs[n] != next->addrs[n]) {
+						next->merge = 0;
+						break;
+					}
+				}
+				if (next->merge == 0)
+					break;
+				trace->size += next->size;
+			}
+			i = j;
+		}
+		memblock_is_cal = 1;
+	}
+
+}
 
 void mtk_memcfg_write_memory_layout_buf(char *fmt, ...)
 {
@@ -244,50 +273,33 @@ static int mtk_memcfg_memory_layout_open(struct inode *inode, struct file *file)
 /* memblock reserve information */
 static int mtk_memcfg_memblock_reserved_show(struct seq_file *m, void *v)
 {
-	int i = 0, j = 0, record_count = 0;
-	unsigned long start, end, rstart, rend;
-	unsigned long bt;
+	int i = 0, display_count = 0, start = 0;
 	struct memblock_stack_trace *trace;
 	struct memblock_record *record;
-	struct memblock_type *type = &memblock.reserved;
-	struct memblock_region *region;
 	unsigned long total_size = 0;
 
-	record_count = min(memblock_reserve_count, MAX_MEMBLOCK_RECORD);
+	mtk_memcfg_merge_memblock_record();
 
-	for (i = 0; i < type->cnt; i++) {
-		region = &type->regions[i];
-		start = region->base;
-		end = region->base + region->size;
-		total_size += region->size;
-		seq_printf(m, "region: %lx %lx-%lx\n", (unsigned long)region->size,
-				start, end);
-		for (j = 0; j < record_count; j++) {
-			record = &memblock_record[j];
-			trace = &memblock_stack_trace[j];
-			rstart = record->base;
-			rend = record->end;
-			if ((rstart >= start && rstart < end) ||
-				(rend > start && rend <= end) ||
-				(rstart >= start && rend <= end)) {
-				bt = trace->count - 3;
-				seq_printf(m, "bt    : %lx %lx-%lx\n%pF %pF %pF %pF\n",
-						(unsigned long)record->size,
-						rstart, rend,
-						(void *)trace->addrs[bt],
-						(void *)trace->addrs[bt - 1],
-						(void *)trace->addrs[bt - 2],
-						(void *)trace->addrs[bt - 3]);
-			}
-		}
-		seq_puts(m, "\n");
+	for (i = 0; i < memblock_count; i++) {
+		record = &memblock_record[i];
+		total_size += record->size;
 	}
 
-	seq_printf(m, "Total memblock reserve count: %d\n", memblock_reserve_count);
-	if (memblock_reserve_count >= MAX_MEMBLOCK_RECORD)
-		seq_puts(m, "Total count > MAX_MEMBLOCK_RECORD\n");
 	seq_printf(m, "Memblock reserve total size: 0x%lx\n", total_size);
 
+	for (i = 0; i < memblock_count; i++) {
+		trace = &memblock_stack_trace[i];
+		if (trace->merge == 0) {
+			start = trace->trace.nr_entries - 3;
+			seq_printf(m, "%d 0x%lx %pF %pF %pF %pF\n",
+					display_count++,
+					trace->size,
+					(void *)trace->addrs[start],
+					(void *)trace->addrs[start - 1],
+					(void *)trace->addrs[start - 2],
+					(void *)trace->addrs[start - 3]);
+		}
+	}
 	return 0;
 }
 
@@ -443,23 +455,11 @@ static int mtk_memcfg_oom_open(struct inode *inode, struct file *file)
 	return single_open(file, mtk_memcfg_oom_show, NULL);
 }
 
-static void oom_reboot(unsigned long data)
-{
-	BUG();
-}
-
 static ssize_t
 mtk_memcfg_oom_write(struct file *file, const char __user *buffer,
 		      size_t count, loff_t *pos)
 {
 	static char state;
-	struct timer_list timer;
-
-	/* oom may cause system hang, reboot after 60 sec */
-	init_timer(&timer);
-	timer.function = oom_reboot;
-	timer.expires = jiffies + 300 * HZ;
-	add_timer(&timer);
 
 	if (count > 0) {
 		if (get_user(state, buffer))
@@ -469,8 +469,10 @@ mtk_memcfg_oom_write(struct file *file, const char __user *buffer,
 		if (state) {
 			pr_alert("oom test, trying to kill system under oom scenario\n");
 			/* exhaust all memory */
-			for (;;)
+			for (;;) {
 				alloc_pages(GFP_HIGHUSER_MOVABLE, 0);
+				alloc_pages(GFP_KERNEL, 0);
+			}
 		}
 	}
 	return count;

@@ -1,14 +1,7 @@
 /*
-* Copyright (C) 2017 MediaTek Inc.
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License version 2 as
-* published by the Free Software Foundation.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See http://www.gnu.org/licenses/gpl-2.0.html for more details.
+* Copyright(C)2014 MediaTek Inc.
+* Modification based on code covered by the below mentioned copyright
+* and/or permission notice(S).
 */
 
 #ifndef SENSORS_IO_H
@@ -58,17 +51,6 @@ struct SENSOR_DATA {
 /* mCube add start */
 /* G-sensor */
 
-
-/* add for mag */
-#ifdef CONFIG_COMPAT
-#define COMPAT_GSENSOR_IOCTL_GET_DELAY             _IOR(GSENSOR, 0x10, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_GET_DANT              _IOR(GSENSOR, 0x15, compat_int_t[4])
-#define COMPAT_GSENSOR_IOCTL_READ_REG              _IOR(GSENSOR, 0x19, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_GET_LAYOUT            _IOR(GSENSOR, 0x21, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_WRITE_REG             _IOW(GSENSOR, 0x1A, compat_int_t)
-#endif
-/* add for mag end*/
-
 #define GSENSOR_MCUBE_IOCTL_READ_RBM_DATA      _IOR(GSENSOR, 0x09, struct SENSOR_DATA)
 #define GSENSOR_MCUBE_IOCTL_SET_RBM_MODE       _IO(GSENSOR, 0x0a)
 #define GSENSOR_MCUBE_IOCTL_CLEAR_RBM_MODE     _IO(GSENSOR, 0x0b)
@@ -80,28 +62,6 @@ struct SENSOR_DATA {
 #define GSENSOR_MCUBE_IOCTL_VIRTUAL_Z          _IOR(GSENSOR, 0x11, int)
 #define GSENSOR_MCUBE_IOCTL_READ_PCODE         _IOR(GSENSOR, 0x12, char)
 #define	GSENSOR_MCUBE_IOCTL_GET_OFLAG          _IOR(GSENSOR, 0x13, short)
-
-/* memsic add start */
-#define GSENSOR_IOCTL_GET_DELAY				_IOR(GSENSOR, 0x10, int)
-#define GSENSOR_IOCTL_GET_STATUS			_IOR(GSENSOR, 0x11, int)
-#define GSENSOR_IOCTL_GET_DATA				_IOR(GSENSOR, 0x12, int[3])
-#define GSENSOR_IOCTL_SET_DATA				_IOW(GSENSOR, 0x13, int[3])
-#define GSENSOR_IOCTL_GET_TEMP				_IOR(GSENSOR, 0x14, int)
-#define GSENSOR_IOCTL_GET_DANT				_IOR(GSENSOR, 0x15, int[4])
-#define GSENSOR_IOCTL_SET_TEST1				_IOW(GSENSOR, 0x16, int)
-#define GSENSOR_IOCTL_SET_TEST2				_IOW(GSENSOR, 0x17, int)
-#define GSENSOR_IOCTL_SET_TEST3				_IOW(GSENSOR, 0x18, int)
-#define GSENSOR_IOCTL_READ_REG				_IOR(GSENSOR, 0x19, int)
-
-#define GSENSOR_IOCTL_GET_LAYOUT            _IOR(GSENSOR, 0x21, int)
-#define GSENSOR_IOCTL_WRITE_REG				_IOW(GSENSOR, 0x1A, int)
-
-#define COMPAT_GSENSOR_IOCTL_GET_STATUS				_IOR(GSENSOR, 0x11, int)
-#define COMPAT_GSENSOR_IOCTL_GET_DATA				_IOR(GSENSOR, 0x12, int[3])
-#define COMPAT_GSENSOR_IOCTL_SET_DATA				_IOW(GSENSOR, 0x13, int[3])
-#define COMPAT_GSENSOR_IOCTL_GET_TEMP				_IOR(GSENSOR, 0x14, int)
-/* memsic add end */
-
 #ifdef CONFIG_COMPAT
 #define COMPAT_GSENSOR_MCUBE_IOCTL_READ_RBM_DATA      _IOR(GSENSOR, 0x09, struct SENSOR_DATA)
 #define COMPAT_GSENSOR_MCUBE_IOCTL_SET_RBM_MODE       _IO(GSENSOR, 0x0a)
@@ -187,36 +147,8 @@ struct SENSOR_DATA {
 #define ECOMPASS_IOC_GET_MFLAG			_IOR(MSENSOR, 0x1e, short)
 #define	ECOMPASS_IOC_GET_OFLAG			_IOR(MSENSOR, 0x1f, short)
 #define ECOMPASS_IOC_GET_OPEN_STATUS	_IOR(MSENSOR, 0x20, int)
-#define ECOMPASS_IOC_SET_YPR			_IOW(MSENSOR, 0x21, int[28])
+#define ECOMPASS_IOC_SET_YPR			_IOW(MSENSOR, 0x21, int[12])
 #define ECOMPASS_IOC_GET_LAYOUT			_IOR(MSENSOR, 0X22, int)
-/* add for mag */
-#define GSENSOR_IOCTL_GET_DELAY                         _IOR(GSENSOR, 0x10, int)
-#define GSENSOR_IOCTL_GET_STATUS                        _IOR(GSENSOR, 0x11, int)
-#define GSENSOR_IOCTL_GET_DATA                          _IOR(GSENSOR, 0x12, int[3])
-#define GSENSOR_IOCTL_SET_DATA                          _IOW(GSENSOR, 0x13, int[3])
-#define GSENSOR_IOCTL_GET_TEMP                          _IOR(GSENSOR, 0x14, int)
-#define GSENSOR_IOCTL_GET_DANT                          _IOR(GSENSOR, 0x15, int[4])
-#define GSENSOR_IOCTL_SET_TEST1                         _IOW(GSENSOR, 0x16, int)
-#define GSENSOR_IOCTL_SET_TEST2                         _IOW(GSENSOR, 0x17, int)
-#define GSENSOR_IOCTL_SET_TEST3                         _IOW(GSENSOR, 0x18, int)
-#define GSENSOR_IOCTL_READ_REG                          _IOR(GSENSOR, 0x19, int)
-
-#define GSENSOR_IOCTL_GET_LAYOUT            _IOR(GSENSOR, 0x21, int)
-#define GSENSOR_IOCTL_WRITE_REG                         _IOW(GSENSOR, 0x1A, int)
-
-#define COMPAT_GSENSOR_IOCTL_GET_STATUS                         _IOR(GSENSOR, 0x11, int)
-#define COMPAT_GSENSOR_IOCTL_GET_DATA                           _IOR(GSENSOR, 0x12, int[3])
-#define COMPAT_GSENSOR_IOCTL_SET_DATA                           _IOW(GSENSOR, 0x13, int[3])
-#define COMPAT_GSENSOR_IOCTL_GET_TEMP                           _IOR(GSENSOR, 0x14, int)
-
-#ifdef CONFIG_COMPAT
-#define COMPAT_GSENSOR_IOCTL_GET_DELAY             _IOR(GSENSOR, 0x10, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_GET_DANT              _IOR(GSENSOR, 0x15, compat_int_t[4])
-#define COMPAT_GSENSOR_IOCTL_READ_REG              _IOR(GSENSOR, 0x19, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_GET_LAYOUT            _IOR(GSENSOR, 0x21, compat_int_t)
-#define COMPAT_GSENSOR_IOCTL_WRITE_REG             _IOW(GSENSOR, 0x1A, compat_int_t)
-#endif
-/* add for mag end*/
 
 #ifdef CONFIG_COMPAT
 /*COMPAT IOCTLs for AKM library */
@@ -257,7 +189,7 @@ struct SENSOR_DATA {
 #define COMPAT_ECOMPASS_IOC_GET_MFLAG		   _IOR(MSENSOR, 0x1e, compat_short_t)
 #define	COMPAT_ECOMPASS_IOC_GET_OFLAG		   _IOR(MSENSOR, 0x1f, compat_short_t)
 #define COMPAT_ECOMPASS_IOC_GET_OPEN_STATUS	   _IOR(MSENSOR, 0x20, compat_int_t)
-#define COMPAT_ECOMPASS_IOC_SET_YPR			   _IOW(MSENSOR, 0x21, compat_int_t[28])
+#define COMPAT_ECOMPASS_IOC_SET_YPR			   _IOW(MSENSOR, 0x21, compat_int_t[12])
 #define COMPAT_ECOMPASS_IOC_GET_LAYOUT		   _IOR(MSENSOR, 0X22, compat_int_t)
 #endif
 

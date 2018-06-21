@@ -314,7 +314,7 @@ static void lcm_get_params(LCM_PARAMS *params)
 
 	params->dsi.PS = LCM_PACKED_PS_24BIT_RGB888;
 
-#if 0
+#if 1
 	params->dsi.vertical_sync_active = 3;
 	params->dsi.vertical_backporch = 12;
 	params->dsi.vertical_frontporch = 10;
@@ -329,7 +329,7 @@ static void lcm_get_params(LCM_PARAMS *params)
 #else
 	params->dsi.vertical_sync_active = 3;
 	params->dsi.vertical_backporch = 12;
-	params->dsi.vertical_frontporch = 10;
+	params->dsi.vertical_frontporch = 3;
 	params->dsi.vertical_active_line = FRAME_HEIGHT;
 
 	params->dsi.horizontal_sync_active = 10;
@@ -363,7 +363,9 @@ static unsigned int lcm_compare_id(void)
 
 	array[0] = 0x00033700;	/* read id return two byte,version and id */
 	dsi_set_cmdq(array, 1, 1);
+
 	read_reg_v2(0xDA, buffer, 1);
+
 
 	array[0] = 0x00033700;	/* read id return two byte,version and id */
 	dsi_set_cmdq(array, 1, 1);
@@ -382,17 +384,8 @@ static unsigned int lcm_compare_id(void)
 	printf("%s, id1 = 0x%08x\n", __func__, id1);	/* should be 0xaa */
 	printf("%s, id2 = 0x%08x\n", __func__, id2);	/* should be 0x55 */
 #endif
-	pr_debug("%s, id0 = 0x%08x\n", __func__, id0);	/* should be 0x00 */
-	pr_debug("%s, id1 = 0x%08x\n", __func__, id1);	/* should be 0xaa */
-	pr_debug("%s, id2 = 0x%08x\n", __func__, id2);	/* should be 0x55 */
 
-	if ((id0 == 0x40) && (id1 == 0x00)) {
-		pr_debug("compare id success\n");
-		return 1;
-	}
-
-	pr_debug("compare id failed\n");
-	return 0;
+	return 1;
 }
 
 static void lcm_init(void)

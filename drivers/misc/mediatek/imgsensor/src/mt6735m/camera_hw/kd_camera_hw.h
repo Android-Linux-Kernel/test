@@ -84,7 +84,6 @@ int mtkcam_gpio_init(struct platform_device *pdev);
 typedef enum KD_REGULATOR_TYPE_TAG {
 	VCAMA,
 	VCAMD,
-	VRF18_1,
 	VCAMIO,
 	VCAMAF,
 	SUB_VCAMD,
@@ -95,8 +94,7 @@ typedef enum {
 	CAMRST,
 	CAM1PDN,
 	CAM1RST,
-	CAMLDO_0,
-	CAMLDO_1
+	CAMLDO
 } CAMPowerType;
 extern bool _hwPowerDown(KD_REGULATOR_TYPE_T type);
 extern bool _hwPowerOn(KD_REGULATOR_TYPE_T type, int powerVolt);

@@ -36,7 +36,6 @@
 /* #include <cust_gpio_usage.h> */
 #endif
 #include "ddp_mmp.h"
-#include "disp_dts_gpio.h"
 
 /* static unsigned int _dsi_reg_update_wq_flag = 0; */
 static DECLARE_WAIT_QUEUE_HEAD(_dsi_reg_update_wq);
@@ -1235,6 +1234,11 @@ DSI_STATUS DSI_TXRX_Control(DISP_MODULE_ENUM module, cmdqRecHandle cmdq,
 	bool dis_eotp_en = false;
 	bool hstx_cklp_en = false;
 	int max_return_size = 0;
+	//oufeigang esd for A158---qiumeng@wind-mobi.com begin at 20161121	
+	extern bool oufeiguang_esd;
+	if(oufeiguang_esd == true)		
+		 hstx_cklp_en = true;
+    //oufeigang esd for A158---qiumeng@wind-mobi.com end at 20161121
 
 	switch (lane_num) {
 	case LCM_ONE_LANE:
@@ -2738,29 +2742,6 @@ static LCM_UTIL_FUNCS lcm_utils_dsi0;
 static LCM_UTIL_FUNCS lcm_utils_dsi1;
 static LCM_UTIL_FUNCS lcm_utils_dsidual;
 
-long lcd_enp_bias_setting(unsigned int value)
-{
-	long ret = 0;
-
-	if (value)
-		ret = disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP);
-	else
-		ret = disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN);
-
-	return ret;
-}
-
-long lcd_enp_bias_setting_by_name(bool bOn, char *pinName)
-{
-	long ret = 0;
-
-	if (bOn)
-		ret = lcm_turn_on_gate_by_name(1, pinName);
-	else
-		ret = lcm_turn_on_gate_by_name(0, pinName);
-
-	return ret;
-}
 
 int ddp_dsi_set_lcm_utils(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 {
@@ -2843,7 +2824,6 @@ int ddp_dsi_set_lcm_utils(DISP_MODULE_ENUM module, LCM_DRIVER *lcm_drv)
 	utils->set_gpio_mode = 0;
 	utils->set_gpio_dir = 0;
 	utils->set_gpio_pull_enable = 0;
-	utils->set_gpio_lcd_enp_bias_ByName = lcd_enp_bias_setting_by_name;
 #endif
 #endif
 

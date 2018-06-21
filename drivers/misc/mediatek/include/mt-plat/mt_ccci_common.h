@@ -281,8 +281,7 @@ typedef enum {
 	ID_START_MD = 19,
 	ID_UPDATE_MD_BOOT_MODE = 20,
 	ID_MD_MPU_ASSERT = 21,
-	ID_ENTER_FLIGHT_MODE = 22,
-	ID_LEAVE_FLIGHT_MODE = 23,
+	ID_MD_RF_DESENSE = 22, /* Notify MD camera on/off will affect MD RF */
 
 	ID_UPDATE_TX_POWER = 100,   /* for SWTP */
 

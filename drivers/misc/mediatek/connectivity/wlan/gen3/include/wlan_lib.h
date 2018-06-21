@@ -908,8 +908,6 @@ VOID wlanCfgSetSwCtrl(IN P_ADAPTER_T prAdapter);
 
 VOID wlanCfgSetChip(IN P_ADAPTER_T prAdapter);
 
-VOID wlanGetFwInfo(IN P_ADAPTER_T prAdapter);
-
 VOID wlanCfgSetDebugLevel(IN P_ADAPTER_T prAdapter);
 
 VOID wlanCfgSetCountryCode(IN P_ADAPTER_T prAdapter);
@@ -968,9 +966,5 @@ WLAN_STATUS wlanIcmpTxDone(IN P_ADAPTER_T prAdapter,
 
 WLAN_STATUS wlanTdlsTxDone(IN P_ADAPTER_T prAdapter,
 			  IN P_MSDU_INFO_T prMsduInfo, IN ENUM_TX_RESULT_CODE_T rTxDoneStatus);
-
-WLAN_STATUS wlanDnsTxDone(IN P_ADAPTER_T prAdapter,
-			IN P_MSDU_INFO_T prMsduInfo, IN ENUM_TX_RESULT_CODE_T rTxDoneStatus);
-
 VOID wlanReleasePendingCmdById(P_ADAPTER_T prAdapter, UINT_8 ucCid);
 

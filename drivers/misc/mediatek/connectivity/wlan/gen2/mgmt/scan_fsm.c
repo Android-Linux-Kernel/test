@@ -1188,16 +1188,6 @@ scnFsmSchedScanRequest(IN P_ADAPTER_T prAdapter,
 		return TRUE;
 	}
 
-	/*check if normal scanning is true, driver start to postpone sched scan request*/
-	prScanInfo->eCurrendSchedScanReq = SCHED_SCAN_POSTPONE_START;
-
-	if (prScanInfo->eCurrentState != SCAN_STATE_IDLE) {
-		prScanInfo->fgIsPostponeSchedScan = TRUE;
-		DBGLOG(SCN, WARN, "already normal scanning ,driver postpones sched scan request!\n");
-		return TRUE;
-	}
-
-	prScanInfo->fgIsPostponeSchedScan = FALSE;
 	prScanInfo->fgNloScanning = TRUE;
 
 	/* 1. load parameters */
@@ -1299,7 +1289,7 @@ scnFsmSchedScanRequest(IN P_ADAPTER_T prAdapter,
 			    CMD_ID_SET_NLO_REQ,
 			    TRUE,
 			    FALSE,
-			    FALSE,
+			    TRUE,
 			    nicCmdEventSetCommon,
 			    nicOidCmdTimeoutCommon,
 			    sizeof(CMD_NLO_REQ) + prCmdNloReq->u2IELen, (PUINT_8) prCmdNloReq, NULL, 0);
@@ -1335,7 +1325,6 @@ BOOLEAN scnFsmSchedScanStopRequest(IN P_ADAPTER_T prAdapter)
 	prNloParam = &prScanInfo->rNloParam;
 	prScanParam = &prNloParam->rScanParam;
 
-
 #if 0
 	if (IS_NET_ACTIVE(prAdapter, NETWORK_TYPE_AIS_INDEX)) {
 		UNSET_NET_ACTIVE(prAdapter, NETWORK_TYPE_AIS_INDEX);
@@ -1346,16 +1335,6 @@ BOOLEAN scnFsmSchedScanStopRequest(IN P_ADAPTER_T prAdapter)
 	}
 #endif
 
-	/*check if normal scanning is true, driver start to postpone sched scan stop request*/
-	prScanInfo->eCurrendSchedScanReq = SCHED_SCAN_POSTPONE_STOP;
-
-	if (prScanInfo->eCurrentState != SCAN_STATE_IDLE) {
-		prScanInfo->fgIsPostponeSchedScan = TRUE;
-		DBGLOG(SCN, WARN, "already normal scanning ,driver postpones sched scan stop request!\n");
-		return TRUE;
-	}
-	prScanInfo->fgIsPostponeSchedScan = FALSE;
-
 	/* send cancel message to firmware domain */
 	rCmdNloCancel.ucSeqNum = prScanParam->ucSeqNum;
 
@@ -1364,7 +1343,7 @@ BOOLEAN scnFsmSchedScanStopRequest(IN P_ADAPTER_T prAdapter)
 			    CMD_ID_SET_NLO_CANCEL,
 			    TRUE,
 			    FALSE,
-			    FALSE,
+			    TRUE,
 			    nicCmdEventSetStopSchedScan,
 			    nicOidCmdTimeoutCommon, sizeof(CMD_NLO_CANCEL), (PUINT_8)(&rCmdNloCancel), NULL, 0);
 #else
@@ -1709,6 +1688,12 @@ scnRemoveFromPSCN(IN P_ADAPTER_T prAdapter,
 		kalMemZero(&prCmdPscnParam->rCmdGscnReq, sizeof(CMD_GSCN_REQ_T));
 	}
 
+	/* sync to firmware */
+	if (fgRemoveNLOfromPSCN || fgRemoveBatchSCNfromPSCN || fgRemoveGSCNfromPSCN) {
+		/* prScanInfo->fgPscnOngoing = FALSE;
+		scnPSCNFsm(prAdapter, PSCN_RESET); */
+	}
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -1838,7 +1823,7 @@ BOOLEAN scnSetGSCNParam(IN P_ADAPTER_T prAdapter, IN P_PARAM_WIFI_GSCAN_CMD_PARA
 
 	ASSERT(prAdapter);
 	prCmdGscnReq = kalMemAlloc(sizeof(CMD_GSCN_REQ_T), VIR_MEM_TYPE);
-	if (!prCmdGscnReq) {
+	if (prCmdGscnReq == NULL) {
 		DBGLOG(SCN, ERROR, "alloc prCmdGscnReq fail\n");
 		return FALSE;
 	}
@@ -1933,7 +1918,9 @@ BOOLEAN scnFsmGetGSCNResult(IN P_ADAPTER_T prAdapter, IN P_CMD_GET_GSCAN_RESULT_
 	kalMemCopy(&rGetGscnResultCmd, prGetGscnResultCmd, sizeof(CMD_GET_GSCAN_RESULT_T));
 	DBGLOG(SCN, TRACE, "rGetGscnResultCmd: ucGetNum[%d], fgFlush[%d]\n",
 		rGetGscnResultCmd.u4Num, rGetGscnResultCmd.ucFlush);
-	if ((rGetGscnResultCmd.u4Num == 0) || (rGetGscnResultCmd.u4Num > PSCAN_MAX_AP_CACHE_PER_SCAN))
+	rGetGscnResultCmd.u4Num = (rGetGscnResultCmd.u4Num <= PSCAN_MAX_AP_CACHE_PER_SCAN)
+		? rGetGscnResultCmd.u4Num : PSCAN_MAX_AP_CACHE_PER_SCAN;
+	if (rGetGscnResultCmd.u4Num == 0)
 		rGetGscnResultCmd.u4Num = PSCAN_MAX_AP_CACHE_PER_SCAN;
 
 #if 0 /* get GScan results from firmware */
@@ -1942,7 +1929,7 @@ BOOLEAN scnFsmGetGSCNResult(IN P_ADAPTER_T prAdapter, IN P_CMD_GET_GSCAN_RESULT_
 				CMD_ID_GET_GSCN_SCN_RESULT,
 				FALSE,
 				TRUE,
-				FALSE,
+				TRUE,
 				NULL,
 				nicOidCmdTimeoutCommon,
 				sizeof(CMD_GET_GSCAN_RESULT_T), (PUINT_8)&rGetGscnResultCmd, NULL, *pu4SetInfoLen);
@@ -1955,7 +1942,7 @@ BOOLEAN scnFsmGetGSCNResult(IN P_ADAPTER_T prAdapter, IN P_CMD_GET_GSCAN_RESULT_
 	prGscnResult = kalMemAlloc(u4SizeofGScanResults, VIR_MEM_TYPE);
 	if (!prGscnResult) {
 		DBGLOG(SCN, ERROR, "Can not alloc memory for PARAM_WIFI_GSCAN_RESULT_REPORT\n");
-		return FALSE;
+		return -ENOMEM;
 	}
 	kalMemZero(prGscnResult, u4SizeofGScanResults);
 
@@ -1973,10 +1960,8 @@ BOOLEAN scnFsmGetGSCNResult(IN P_ADAPTER_T prAdapter, IN P_CMD_GET_GSCAN_RESULT_
 
 		if (numAp < prAdapter->rWlanInfo.u4ScanResultNum)
 			remainAp = prAdapter->rWlanInfo.u4ScanResultNum - numAp;
-		else {
-			kalMemFree(prGscnResult, VIR_MEM_TYPE, u4SizeofGScanResults);
+		else
 			return FALSE;
-		}
 		rGetGscnResultCmd.u4Num =
 			(rGetGscnResultCmd.u4Num <= remainAp) ? rGetGscnResultCmd.u4Num : remainAp;
 
@@ -2045,7 +2030,7 @@ BOOLEAN scnFsmGSCNResults(IN P_ADAPTER_T prAdapter, IN P_EVENT_GSCAN_RESULT_T pr
 	prGscnResult = kalMemAlloc(sizeof(PARAM_WIFI_GSCAN_RESULT_REPORT), VIR_MEM_TYPE);
 	if (!prGscnResult) {
 		DBGLOG(SCN, ERROR, "Can not alloc memory for PARAM_WIFI_GSCAN_RESULT_REPORT\n");
-		return FALSE;
+		return -ENOMEM;
 	}
 
 	prGscnResult->u4ScanId = (UINT_32)prEventBuffer->u2ScanId;

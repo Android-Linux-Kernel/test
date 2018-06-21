@@ -182,7 +182,8 @@ void mtk_wdt_mode_config(bool dual_mode_en,
 	mt_reg_sync_writel(tmp, MTK_WDT_MODE);
 	/* dual_mode(1); //always dual mode */
 	/* mdelay(100); */
-	pr_debug(" mtk_wdt_mode_config  mode value=%x, tmp:%x,pid=%d\n", __raw_readl(MTK_WDT_MODE), tmp, current->pid);
+	/*pr_debug(" mtk_wdt_mode_config  mode value=%x, tmp:%x,pid=%d\n",
+		__raw_readl(MTK_WDT_MODE), tmp, current->pid);*/
     #endif
 	spin_unlock(&rgu_reg_operation_spinlock);
 }
@@ -321,12 +322,14 @@ void wdt_arch_reset(char mode)
 #ifdef CONFIG_OF
 	struct device_node *np_rgu;
 #endif
-	pr_debug("wdt_arch_reset called@Kernel mode =%c\n", mode);
 
 #ifdef CONFIG_MTK_MULTIBRIDGE_SUPPORT
-	mt8193_bus_clk_switch(false);
+	mt8193_bus_clk_switch_to_26m();
 #endif
 
+	pr_debug("wdt_arch_reset called@Kernel mode =%c\n", mode);
+
+	spin_lock_irq(&rgu_reg_operation_spinlock);
 #ifdef CONFIG_OF
 	np_rgu = of_find_compatible_node(NULL, NULL, rgu_of_match[0].compatible);
 
@@ -337,33 +340,29 @@ void wdt_arch_reset(char mode)
 		pr_debug("RGU base: 0x%p  RGU irq: %d\n", toprgu_base, wdt_irq_id);
 	}
 #endif
-	spin_lock(&rgu_reg_operation_spinlock);
 	/* Watchdog Rest */
 	mt_reg_sync_writel(MTK_WDT_RESTART_KEY, MTK_WDT_RESTART);
 	wdt_mode_val = __raw_readl(MTK_WDT_MODE);
-	pr_debug("wdt_arch_reset called MTK_WDT_MODE =%x\n", wdt_mode_val);
 	/* clear autorestart bit: autoretart: 1, bypass power key, 0: not bypass power key */
 	wdt_mode_val &= (~MTK_WDT_MODE_AUTO_RESTART);
 	/* make sure WDT mode is hw reboot mode, can not config isr mode  */
 	wdt_mode_val &= (~(MTK_WDT_MODE_IRQ|MTK_WDT_MODE_ENABLE | MTK_WDT_MODE_DUAL_MODE));
-	if (mode)
-		/* mode != 0 means by pass power key reboot, We using auto_restart bit as by pass power key flag */
-		wdt_mode_val = wdt_mode_val | (MTK_WDT_MODE_KEY|MTK_WDT_MODE_EXTEN|MTK_WDT_MODE_AUTO_RESTART);
-	else
-		wdt_mode_val = wdt_mode_val | (MTK_WDT_MODE_KEY|MTK_WDT_MODE_EXTEN);
 
+	/* mode != 0 means by pass power key reboot, We using auto_restart bit as by pass power key flag */
+	if (mode)
+		wdt_mode_val |= MTK_WDT_MODE_AUTO_RESTART;
+
+	wdt_mode_val |= (MTK_WDT_MODE_KEY | MTK_WDT_MODE_EXTEN);
 	mt_reg_sync_writel(wdt_mode_val, MTK_WDT_MODE);
-	pr_debug("wdt_arch_reset called end MTK_WDT_MODE =%x\n", wdt_mode_val);
 	udelay(100);
 	mt_reg_sync_writel(MTK_WDT_SWRST_KEY, MTK_WDT_SWRST);
 	pr_debug("wdt_arch_reset: SW_reset happen\n");
-	spin_unlock(&rgu_reg_operation_spinlock);
+	spin_unlock_irq(&rgu_reg_operation_spinlock);
 
 	while (1) {
 		wdt_dump_reg();
 		pr_err("wdt_arch_reset error\n");
 	}
-
 }
 
 int mtk_rgu_dram_reserved(int enable)
@@ -745,6 +744,7 @@ static void mtk_wdt_shutdown(struct platform_device *dev)
 	/* mtk_wdt_mode_config(TRUE, FALSE, FALSE, FALSE, FALSE); */
 
 	mtk_wdt_restart(WD_TYPE_NORMAL);
+
 	pr_debug("******** MTK WDT driver shutdown done ********\n");
 }
 
@@ -757,7 +757,7 @@ void mtk_wd_suspend(void)
 	mtk_wdt_restart(WD_TYPE_NORMAL);
 
 	/*aee_sram_printk("[WDT] suspend\n");*/
-	pr_debug("[WDT] suspend\n");
+	/*pr_debug("[WDT] suspend\n");*/
 }
 
 void mtk_wd_resume(void)
@@ -770,7 +770,7 @@ void mtk_wd_resume(void)
 	}
 
 	/*aee_sram_printk("[WDT] resume(%d)\n", g_wdt_enable);*/
-	pr_debug("[WDT] resume(%d)\n", g_wdt_enable);
+	/*pr_debug("[WDT] resume(%d)\n", g_wdt_enable);*/
 }
 
 

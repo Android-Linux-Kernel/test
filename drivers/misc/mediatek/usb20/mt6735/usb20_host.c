@@ -104,9 +104,6 @@ void mt_usb_set_vbus(struct musb *musb, int is_on)
 	#elif defined(CONFIG_MTK_BQ24196_SUPPORT)
 		bq24196_set_otg_config(0x01);	/* OTG */
 		bq24196_set_boost_lim(0x01);	/* 1.3A on VBUS */
-	#elif defined(CONFIG_MTK_SM5414_SUPPORT)
-		sm5414_otg_enable(KAL_TRUE);
-		sm5414_set_votg(0x0);        
 	#elif defined(CONFIG_MTK_NCP1854_SUPPORT)
 		ncp1854_set_otg_en(0);
 		ncp1854_set_chg_en(0);
@@ -136,8 +133,6 @@ void mt_usb_set_vbus(struct musb *musb, int is_on)
 		bq24296_set_otg_config(0);
 	#elif defined(CONFIG_MTK_BQ24196_SUPPORT)
 		bq24196_set_otg_config(0x0);	/* OTG disabled */
-	#elif defined(CONFIG_MTK_SM5414_SUPPORT)
-		sm5414_otg_enable(KAL_FALSE);        
 	#elif defined(CONFIG_MTK_NCP1854_SUPPORT)
 		ncp1854_set_otg_en(0x0);
 	#else
@@ -245,7 +240,13 @@ static bool musb_is_host(void)
 	#if defined(CONFIG_MTK_LEGACY)
 	iddig_state = mt_get_gpio_in(iddig_pin);
 	#else
-	iddig_state = __gpio_get_value(iddig_pin);
+	//zhanyoufei@wind-mobi.com 20161209 begin
+		#ifdef CONFIG_MTK_FAN5405_SUPPORT
+		iddig_state = mt_get_gpio_in(iddig_pin);
+		#else
+		iddig_state = __gpio_get_value(iddig_pin);
+		#endif
+	//zhanyoufei@wind-mobi.com 20161209 end
 	#endif
 	#else
 	iddig_state = mt_get_gpio_in(GPIO_OTG_IDDIG_EINT_PIN);

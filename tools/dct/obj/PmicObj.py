@@ -203,3 +203,4 @@ class PmicObj(ModuleObj):
         gen_str += '''}\n'''
 
         return gen_str
+

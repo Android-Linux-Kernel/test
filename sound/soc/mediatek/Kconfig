@@ -80,6 +80,14 @@ config MTK_SPEAKER
 	help
 	  If you say Y, enable MTK_SPEAKER_AMP
 
+##ext pa add for A158 ----qiumeng@wind-mobi.com begin at 20161109
+config MTK_LEGACY_EXTSPK
+	bool "MTK_LEGACY_EXTSPK"
+	default n
+	help
+	  If you say Y, enable MTK_LEGACY_EXTSPK
+##ext pa add for A158 ----qiumeng@wind-mobi.com end at 20161109
+
 config MTK_NXP_TFA9890
 	bool "MTK_NXP_TFA9890"
 	default n
@@ -199,13 +207,12 @@ config MTK_SND_SOC_NEW_ARCH
 	  If you say Y, enable MTK_SND_SOC_NEW_ARCH.
 	  Only enable this when you use refactored audio driver architecture.
 
-config MTK_AUDIO_TUNNELING_SUPPORT
+config MTK_OFFLOAD_PLAYBACK
 	bool "Audio playback through dsp"
 	help
+	  If you say Y, enable MTK_OFFLOAD_PLAYBACK.
 	  Only enable this when we have DSP.
-	  This makes audio output pass bitstream without any post processing.
-	  The decoding process is done in DSP.
-          Select Y to enable MTK_AUDIO_TUNNELING_SUPPORT for DSP playback.
+	  This makes audio out pass bitstream, and decoding process is done in DSP.
 
 config MTK_SND_HYBRID_DRE_SUPPORT
 	bool "Audio Hybrid DRE support"

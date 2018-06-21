@@ -86,6 +86,7 @@ struct last_reboot_reason {
 	uint64_t cpu_dormant[NR_CPUS];
 	uint32_t clk_data[8];
 	uint32_t suspend_debug_flag;
+	uint32_t fiq_cache_step;
 
 	uint32_t vcore_dvfs_opp;
 	uint32_t vcore_dvfs_status;
@@ -1101,6 +1102,14 @@ unsigned long *aee_rr_rec_cpu_dormant_pa(void)
 {
 	if (ram_console_buffer_pa)
 		return (unsigned long *)&RR_LINUX_PA->cpu_dormant;
+	else
+		return NULL;
+}
+
+unsigned long *aee_rr_rec_fiq_cache_step_pa(void)
+{
+	if (ram_console_buffer_pa)
+		return (unsigned long *)&RR_LINUX_PA->fiq_cache_step;
 	else
 		return NULL;
 }
@@ -2174,6 +2183,11 @@ void aee_rr_show_clk(struct seq_file *m)
 		seq_printf(m, "clk_data: 0x%x\n", LAST_RRR_VAL(clk_data[i]));
 }
 
+void aee_rr_show_fiq_cache_step(struct seq_file *m)
+{
+	seq_printf(m, "  fiq_cache_step: %d\n", LAST_RRR_VAL(fiq_cache_step));
+}
+
 void aee_rr_show_vcore_dvfs_opp(struct seq_file *m)
 {
 	seq_printf(m, "vcore_dvfs_opp: 0x%x\n", LAST_RRR_VAL(vcore_dvfs_opp));
@@ -2793,6 +2807,7 @@ last_rr_show_t aee_rr_show[] = {
 	aee_rr_show_vcore_dvfs_status,
 	aee_rr_show_vcore_dvfs_debug_regs,
 	aee_rr_show_clk,
+	aee_rr_show_fiq_cache_step,
 	aee_rr_show_ppm_cluster_limit,
 	aee_rr_show_ppm_step,
 	aee_rr_show_ppm_cur_state,

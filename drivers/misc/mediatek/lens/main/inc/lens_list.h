@@ -70,16 +70,6 @@ extern long DW9714AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
 			   unsigned long a_u4Param);
 extern int DW9714AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
 #endif
-#ifdef CONFIG_MTK_LENS_DW9800AF_SUPPORT
-#define DW9714AF_SetI2Cclient DW9800AF_SetI2Cclient_Main
-#define DW9714AF_Ioctl DW9800AF_Ioctl_Main
-#define DW9714AF_Release DW9800AF_Release_Main
-extern void DW9800AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_SpinLock,
-				  int *pAF_Opened);
-extern long DW9800AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
-			   unsigned long a_u4Param);
-extern int DW9800AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
-#endif
 
 #ifdef CONFIG_MTK_LENS_DW9814AF_SUPPORT
 #define DW9814AF_SetI2Cclient DW9814AF_SetI2Cclient_Main
@@ -102,6 +92,42 @@ extern long DW9718AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
 			   unsigned long a_u4Param);
 extern int DW9718AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
 #endif
+
+//luminjie@wind-mobi.com add for qt 9718 lens 20161230 begin
+#ifdef CONFIG_MTK_LENS_DW9718AF_QT_SUPPORT
+#define DW9718AF_QT_SetI2Cclient DW9718AF_QT_SetI2Cclient_Main
+#define DW9718AF_QT_Ioctl DW9718AF_QT_Ioctl_Main
+#define DW9718AF_QT_Release DW9718AF_QT_Release_Main
+extern void DW9718AF_QT_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_SpinLock,
+				  int *pAF_Opened);
+extern long DW9718AF_QT_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+			   unsigned long a_u4Param);
+extern int DW9718AF_QT_Release(struct inode *a_pstInode, struct file *a_pstFile);
+#endif
+
+
+#ifdef CONFIG_MTK_LENS_DW9718AF_HLT_SUPPORT
+#define DW9718AF_HLT_SetI2Cclient DW9718AF_HLT_SetI2Cclient_Main
+#define DW9718AF_HLT_Ioctl DW9718AF_HLT_Ioctl_Main
+#define DW9718AF_HLT_Release DW9718AF_HLT_Release_Main
+extern void DW9718AF_HLT_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_SpinLock,
+				  int *pAF_Opened);
+extern long DW9718AF_HLT_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+			   unsigned long a_u4Param);
+extern int DW9718AF_HLT_Release(struct inode *a_pstInode, struct file *a_pstFile);
+#endif
+
+#ifdef CONFIG_MTK_LENS_DW9718AF_BLX_SUPPORT
+#define DW9718AF_BLX_SetI2Cclient DW9718AF_BLX_SetI2Cclient_Main
+#define DW9718AF_BLX_Ioctl DW9718AF_BLX_Ioctl_Main
+#define DW9718AF_BLX_Release DW9718AF_BLX_Release_Main
+extern void DW9718AF_BLX_SetI2Cclient(struct i2c_client *pstAF_I2Cclient, spinlock_t *pAF_SpinLock,
+				  int *pAF_Opened);
+extern long DW9718AF_BLX_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+			   unsigned long a_u4Param);
+extern int DW9718AF_BLX_Release(struct inode *a_pstInode, struct file *a_pstFile);
+#endif
+//luminjie@wind-mobi.com add for qt 9718 lens 20161230 end
 
 #ifdef CONFIG_MTK_LENS_DW9719TAF_SUPPORT
 #define DW9719TAF_SetI2Cclient DW9719TAF_SetI2Cclient_Main

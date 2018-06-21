@@ -57,9 +57,7 @@ endif
 ifeq ($(CONFIG_MTK_LENS_LC898212AF_SUPPORT),y)
 MAIN_CFILES += common/lc898212af/LC898212AF.c
 endif
-ifeq ($(CONFIG_MTK_LENS_DW9800AF_SUPPORT),y)
-MAIN_CFILES += common/dw9800af/DW9800AF.c
-endif
+
 obj-m := mainaf.o
 mainaf-objs := $(MAIN_CFILES:.c=.o)
 
@@ -73,6 +71,11 @@ obj-$(CONFIG_MTK_LENS_BU63165AF_SUPPORT)  += common/bu63165af/
 obj-$(CONFIG_MTK_LENS_DW9714AF_SUPPORT)    += common/dw9714af/
 obj-$(CONFIG_MTK_LENS_DW9814AF_SUPPORT)    += common/dw9814af/
 obj-$(CONFIG_MTK_LENS_DW9718AF_SUPPORT)    += common/dw9718af/
+##luminjie@wind-mobi.com add for qt 9718 lens 20170613 begin
+obj-$(CONFIG_MTK_LENS_DW9718AF_QT_SUPPORT)    += common/dw9718af_qt/
+obj-$(CONFIG_MTK_LENS_DW9718AF_HLT_SUPPORT)    += common/dw9718af_hlt/
+obj-$(CONFIG_MTK_LENS_DW9718AF_BLX_SUPPORT)    += common/dw9718af_blx/
+##luminjie@wind-mobi.com add for qt 9718 lens 20170613 begin
 obj-$(CONFIG_MTK_LENS_DW9719TAF_SUPPORT)    += common/dw9719taf/
 obj-$(CONFIG_MTK_LENS_LC898212AF_SUPPORT)  += common/lc898212af/
 obj-$(CONFIG_MTK_LENS_LC898212XDAF_SUPPORT)  += common/lc898212xdaf/
@@ -81,6 +84,5 @@ obj-$(CONFIG_MTK_LENS_LC898122AF_SUPPORT)  += common/lc898122af/
 obj-$(CONFIG_MTK_LENS_AD5820AF_SUPPORT)    += common/ad5820af/
 obj-$(CONFIG_MTK_LENS_WV511AAF_SUPPORT)    += common/wv511aaf/
 obj-$(CONFIG_MTK_LENS_AK7371AF_SUPPORT)    += common/ak7371af/
-obj-$(CONFIG_MTK_LENS_DW9800AF_SUPPORT)    += common/dw9800af/
 
 endif

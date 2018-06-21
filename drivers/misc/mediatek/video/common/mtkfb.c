@@ -892,7 +892,6 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 		} else {
 			DISPERR("information for displayid: %d is not available now\n",
 				displayid);
-			return -EFAULT;
 		}
 
 		if (copy_to_user((void __user *)arg, &(dispif_info[displayid]), sizeof(mtk_dispif_info_t))) {
@@ -1073,8 +1072,6 @@ static int mtkfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg
 			if (layerInfo->layer_id >= TOTAL_OVL_LAYER_NUM) {
 				DISPERR("MTKFB_SET_OVERLAY_LAYER, layer_id invalid=%d\n",
 					 layerInfo->layer_id);
-				kfree(layerInfo);
-				return -EFAULT;
 			} else {
 				input = &session_input.config[session_input.config_layer_num++];
 				_convert_fb_layer_to_disp_input(layerInfo, input);
@@ -1761,9 +1758,8 @@ static int init_framebuffer(struct fb_info *info)
 	/* clean whole frame buffer as black */
 	int size = info->var.xres_virtual * info->var.yres * info->var.bits_per_pixel/8;
 
-	if ((info->var.yres + info->var.yoffset <= info->var.yres_virtual) &&
-		info->var.yoffset >= 0)
-		DISP_memset_io(buffer, 0, size);
+	DISP_memset_io(buffer, 0, size);
+
 
 	return 0;
 }

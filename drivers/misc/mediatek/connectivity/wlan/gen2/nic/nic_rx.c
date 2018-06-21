@@ -796,7 +796,7 @@ UINT_8 nicRxProcessGSCNEvent(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwRfb
 			mtk_cfg80211_vendor_event_full_scan_results(wiphy,
 					prGlueInfo->prDevHandler->ieee80211_ptr,
 					prScanInfo->prGscnFullResult,
-					offsetof(PARAM_WIFI_GSCAN_FULL_RESULT, ie_data) + ie_len);
+					sizeof(PARAM_WIFI_GSCAN_FULL_RESULT) + ie_len);
 		}
 		break;
 
@@ -2806,7 +2806,7 @@ WLAN_STATUS nicRxProcessActionFrame(IN P_ADAPTER_T prAdapter, IN P_SW_RFB_T prSw
 	if (prSwRfb->u2PacketLen < sizeof(WLAN_ACTION_FRAME) - 1)
 		return WLAN_STATUS_INVALID_PACKET;
 	prActFrame = (P_WLAN_ACTION_FRAME) prSwRfb->pvHeader;
-	DBGLOG(RX, INFO, "Category %u, Action %u\n", prActFrame->ucCategory, prActFrame->ucAction);
+	DBGLOG(RX, INFO, "Category %u\n", prActFrame->ucCategory);
 
 	switch (prActFrame->ucCategory) {
 	case CATEGORY_QOS_ACTION:
@@ -2814,10 +2814,6 @@ WLAN_STATUS nicRxProcessActionFrame(IN P_ADAPTER_T prAdapter, IN P_SW_RFB_T prSw
 		handleQosMapConf(prAdapter, prSwRfb);
 		break;
 	case CATEGORY_PUBLIC_ACTION:
-		if (prActFrame->ucAction == PUBLIC_ACTION_GAS_INITIAL_REQ) /* GAS Initial Request */
-			DBGLOG(RX, INFO, "received GAS Initial Request frame\n");
-		else if (prActFrame->ucAction == PUBLIC_ACTION_GAS_INITIAL_RESP) /* GAS Initial Response */
-			DBGLOG(RX, INFO, "received GAS Initial Response frame\n");
 		if (HIF_RX_HDR_GET_NETWORK_IDX(prSwRfb->prHifRxHdr) == NETWORK_TYPE_AIS_INDEX)
 			aisFuncValidateRxActionFrame(prAdapter, prSwRfb);
 #if CFG_ENABLE_WIFI_DIRECT

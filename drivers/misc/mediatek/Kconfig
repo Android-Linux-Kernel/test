@@ -84,6 +84,15 @@ config MTK_GPT_SCHEME_SUPPORT
 	  MTK driver support gpt scheme layout
 	  GPT is a better partition layout scheme
 	  GPT is instead of PMT
+	  
+#tuwenzan@wind-mobi.com add at 20161125 begin
+config WIND_FM_RSSI
+	bool "flag for read FM RSSI"
+	default n
+	help
+	  this is for read fm rssi.
+	  If you are not sure about this, set n
+#tuwenzan@wind-mobi.com add at 20161125 end
 
 source "drivers/misc/mediatek/dum-char/Kconfig"
 source "drivers/misc/mediatek/nand/Kconfig"
@@ -273,6 +282,9 @@ source "drivers/misc/mediatek/conn_md/Kconfig"
 source "drivers/misc/mediatek/dual_ccci/Kconfig"
 source "drivers/misc/mediatek/eccci/Kconfig"
 source "drivers/misc/mediatek/nfc/Kconfig"
+##add sar ----shenyogn@wind-mobi.com 20161111-start
+source "drivers/misc/mediatek/sar/Kconfig"
+##add sar ----shenyogn@wind-mobi.com 20161111-end
 source "drivers/misc/mediatek/ssw/Kconfig"
 
 endmenu  # CONN
@@ -290,6 +302,7 @@ source "drivers/misc/mediatek/emi_bwl/Kconfig"
 source "drivers/misc/mediatek/emi_mbw/Kconfig"
 source "drivers/misc/mediatek/emi_mpu/Kconfig"
 source "drivers/misc/mediatek/ext_gic/Kconfig"
+source "drivers/misc/mediatek/fiq_cache/Kconfig"
 source "drivers/misc/mediatek/gpio/Kconfig"
 source "drivers/misc/mediatek/gpt/Kconfig"
 source "drivers/misc/mediatek/i2c/Kconfig"
@@ -305,7 +318,6 @@ source "drivers/misc/mediatek/mu3phy/Kconfig"
 source "drivers/misc/mediatek/pwm/Kconfig"
 source "drivers/misc/mediatek/rtc/Kconfig"
 source "drivers/misc/mediatek/scp/Kconfig"
-source "drivers/misc/mediatek/audio_ipi/Kconfig"
 source "drivers/misc/mediatek/smi/Kconfig"
 source "drivers/misc/mediatek/ssusb/Kconfig"
 source "drivers/misc/mediatek/systracker/Kconfig"
@@ -316,6 +328,9 @@ source "drivers/misc/mediatek/usb2jtag/Kconfig"
 source "drivers/misc/mediatek/usb_c/Kconfig"
 source "drivers/misc/mediatek/vibrator/Kconfig"
 source "drivers/misc/mediatek/xhci/Kconfig"
+## add wind_device_info for A158---qiumeng@wind-mobi.com 20161123 begin
+source "drivers/misc/mediatek/wind_device_info/Kconfig"
+## add wind_device_info for A158---qiumeng@wind-mobi.com 20161123 end
 
 endmenu  # Peripheral
 
@@ -385,7 +400,6 @@ config MTK_SVP
 config MTK_SVP_RAM_SIZE
 	int "MTK SVP RAM dram buffer size in MB"
 	depends on MTK_SVP
-	default 0
 
 config MTK_TUI_RAM_SIZE
 	int "MTK TUI SVP RAM dram buffer size in MB"
@@ -423,7 +437,6 @@ source "drivers/misc/mediatek/watchpoint/Kconfig"
 source "drivers/misc/mediatek/rt-regmap/Kconfig"
 source "drivers/misc/mediatek/pd/Kconfig"
 
-source "drivers/misc/mediatek/fingerprint/Kconfig"
 endmenu    # Misc
 
 endif

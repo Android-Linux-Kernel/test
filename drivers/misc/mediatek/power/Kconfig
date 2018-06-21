@@ -14,16 +14,6 @@ config MTK_RT9466_SUPPORT
 	  Say y to support this driver.
 	  Say n and choose other chargers.
 	  This driver uses I2C bus.
-      
-config MTK_SM5414_SUPPORT
-	bool "MTK_SM5414_SUPPORT"
-	select MTK_SWITCH_INPUT_OUTPUT_CURRENT_SUPPORT
-	default n
-	---help---
-	Mediatek SM SM5414 driver.
-	Set y to support this driver.
-	Set n and choose other chargers.
-	This driver uses I2c bus.
 
 config MTK_BQ25896_SUPPORT
 	bool "MTK_BQ25896_SUPPORT"
@@ -35,6 +25,13 @@ config MTK_BQ25896_SUPPORT
 	Set n and choose other chargers.
 	This driver uses I2c bus.
 
+# zhanyoufei@wind-mobi.com 20161110 begin
+config MTK_FAN5405_SUPPORT
+	bool "MTK_FAN5405_SUPPORT"
+	select MTK_SWITCH_INPUT_OUTPUT_CURRENT_SUPPORT
+	default n
+# zhanyoufei@wind-mobi.com 20161110 end
+	
 config MTK_BQ25898_DUAL_SUPPORT
 	bool "MTK_BQ25898_DUAL_SUPPORT"
 	select MTK_SWITCH_INPUT_OUTPUT_CURRENT_SUPPORT

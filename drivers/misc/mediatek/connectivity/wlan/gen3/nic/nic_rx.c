@@ -56,7 +56,7 @@
 */
 #define RX_RESPONSE_TIMEOUT (1000)
 
-#if 0 /* CFG_SUPPORT_SNIFFER */
+#if CFG_SUPPORT_SNIFFER
 /* in unit of 100kb/s */
 const EMU_MAC_RATE_INFO_T arMcsRate2PhyRate[] = {
 	/* Phy Rate Code,           BW20,  BW20 SGI, BW40, BW40 SGI, BW80, BW80 SGI, BW160, BW160 SGI */
@@ -1145,7 +1145,6 @@ VOID nicRxProcessMonitorPacket(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwR
 	UINT_8 ucMcs;
 	UINT_8 ucFrMode;
 	UINT_8 ucShortGI;
-	UINT_32 u4PhyRate;
 
 #if CFG_SUPPORT_MULTITHREAD
 	KAL_SPIN_LOCK_DECLARATION();
@@ -1216,7 +1215,7 @@ VOID nicRxProcessMonitorPacket(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwR
 	if ((ucRxMode == RX_VT_LEGACY_CCK) || (ucRxMode == RX_VT_LEGACY_OFDM)) {
 		/* Bit[2:0] for Legacy CCK, Bit[3:0] for Legacy OFDM */
 		ucRxRate = ((prRxStatusGroup3)->u4RxVector[0] & BITS(0, 3));
-		rMonitorRadiotap.ucRate = nicGetHwRateByPhyRate(ucRxRate);
+		rMonitorRadiotap.ucRate = aucHwRate2PhyRate[ucRxRate];
 	} else {
 		ucMcs = ((prRxStatusGroup3)->u4RxVector[0] & RX_VT_RX_RATE_AC_MASK);
 		/* VHTA1 B0-B1 */
@@ -1224,11 +1223,10 @@ VOID nicRxProcessMonitorPacket(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwR
 		ucShortGI = ((prRxStatusGroup3)->u4RxVector[0] & RX_VT_SHORT_GI) ? 1 : 0;	/* VHTA2 B0 */
 
 		/* ucRate(500kbs) = u4PhyRate(100kbps) / 5, max ucRate = 0xFF */
-		u4PhyRate = nicGetPhyRateByMcsRate(ucMcs, ucFrMode, ucShortGI);
-		if (u4PhyRate > 1275)
+		if (arMcsRate2PhyRate[ucMcs].u4PhyRate[ucFrMode][ucShortGI] > 1275)
 			rMonitorRadiotap.ucRate = 0xFF;
 		else
-			rMonitorRadiotap.ucRate = u4PhyRate / 5;
+			rMonitorRadiotap.ucRate = arMcsRate2PhyRate[ucMcs].u4PhyRate[ucFrMode][ucShortGI] / 5;
 	}
 
 	/* Bit Number 3 CHANNEL */
@@ -1590,7 +1588,7 @@ UINT_8 nicRxProcessGSCNEvent(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwRfb
 			mtk_cfg80211_vendor_event_full_scan_results(wiphy,
 					prGlueInfo->prDevHandler->ieee80211_ptr,
 					prScanInfo->prGscnFullResult,
-					offsetof(PARAM_WIFI_GSCAN_FULL_RESULT, ie_data) + ie_len);
+					sizeof(PARAM_WIFI_GSCAN_FULL_RESULT) + ie_len);
 		}
 		break;
 
@@ -2419,9 +2417,6 @@ VOID nicRxProcessEventPacket(IN P_ADAPTER_T prAdapter, IN OUT P_SW_RFB_T prSwRfb
 	case EVENT_ID_RSP_CHNL_UTILIZATION:
 		cnmHandleChannelUtilization(prAdapter, (struct EVENT_RSP_CHNL_UTILIZATION *)prEvent->aucBuffer);
 		break;
-	case EVENT_ID_UPDATE_FW_INFO:
-		nicEventUpdateFwInfo(prAdapter, prEvent);
-		break;
 	case EVENT_ID_ACCESS_REG:
 	case EVENT_ID_NIC_CAPABILITY:
 		/* case EVENT_ID_MAC_MCAST_ADDR: */
@@ -3136,10 +3131,11 @@ VOID nicRxSDIOAggReceiveRFBs(IN P_ADAPTER_T prAdapter)
 	P_SW_RFB_T prSwRfb = (P_SW_RFB_T) NULL;
 	UINT_32 u4RxLength;
 	UINT_32 i, rxNum;
-	UINT_32 u4RxAggLength = 0;
-	UINT_32 u4RxAvailAggLen;
+	UINT_32 u4RxAggCount = 0, u4RxAggLength = 0;
+	UINT_32 u4RxAvailAggLen, u4CurrAvailFreeRfbCnt;
 	PUINT_8 pucSrcAddr;
 	P_HW_MAC_RX_DESC_T prRxStatus;
+	BOOL fgResult = TRUE;
 	BOOLEAN fgIsRxEnhanceMode;
 	UINT_16 u2RxPktNum;
 #if CFG_SDIO_RX_ENHANCE
@@ -3178,15 +3174,10 @@ VOID nicRxSDIOAggReceiveRFBs(IN P_ADAPTER_T prAdapter)
 			     0 ? prEnhDataStr->rRxInfo.u.u2NumValidRx0Len : prEnhDataStr->rRxInfo.u.u2NumValidRx1Len);
 
 			/* if this assertion happened, it is most likely a F/W bug */
+			ASSERT(u2RxPktNum <= 16);
 
-			if (u2RxPktNum > 16) {
-				DBGLOG(RX, ERROR,
-				       "[%s]packets received are abnormal, need chip reset!\n", __func__);
-				DBGLOG_MEM32(RX, WARN, (PUINT_32)&prEnhDataStr->rRxInfo,
-					     sizeof(prEnhDataStr->rRxInfo));
-				glResetTrigger(prAdapter);
-				return;
-			}
+			if (u2RxPktNum > 16)
+				continue;
 
 			if (u2RxPktNum == 0)
 				continue;
@@ -3196,68 +3187,132 @@ VOID nicRxSDIOAggReceiveRFBs(IN P_ADAPTER_T prAdapter)
 			prRxCtrl->u4TotalRxPacketNum += u2RxPktNum;
 #endif
 
+			u4CurrAvailFreeRfbCnt = prRxCtrl->rFreeSwRfbList.u4NumElem;
+
+			/* if SwRfb is not enough, abort reading this time */
+			if (u4CurrAvailFreeRfbCnt < u2RxPktNum) {
+#if CFG_HIF_RX_STARVATION_WARNING
+				DbgPrint("FreeRfb is not enough: %d available, need %d\n",
+					 u4CurrAvailFreeRfbCnt, u2RxPktNum);
+				DbgPrint("Queued Count: %d / Dequeud Count: %d\n",
+					 prRxCtrl->u4QueuedCnt, prRxCtrl->u4DequeuedCnt);
+#endif
+				continue;
+			}
 #if CFG_SDIO_RX_ENHANCE
 			u4RxAvailAggLen =
 			    CFG_RX_COALESCING_BUFFER_SIZE - (sizeof(ENHANCE_MODE_DATA_STRUCT_T) +
 							     4 /* extra HW padding */);
 #else
-			u4RxAvailAggLen = 16 * ALIGN_4(CFG_RX_MAX_PKT_SIZE+HIF_RX_HW_APPENDED_LEN);
+			u4RxAvailAggLen = CFG_RX_COALESCING_BUFFER_SIZE;
 #endif
+			u4RxAggCount = 0;
+
 			for (i = 0; i < u2RxPktNum; i++) {
+				PUINT_8 pucZeroArray = NULL;
+
+restart:
 				u4RxLength = (rxNum == 0 ?
 					      (UINT_32) prEnhDataStr->rRxInfo.u.au2Rx0Len[i] :
 					      (UINT_32) prEnhDataStr->rRxInfo.u.au2Rx1Len[i]);
 
 				if (!u4RxLength) {
-					DBGLOG(RX, ERROR, "[%s]HIF RX len(%d), SDIO abnormal, needs chip reset...\n",
-					       __func__, u4RxLength);
-					DBGLOG_MEM32(RX, WARN, (PUINT_32)&prEnhDataStr->rRxInfo,
-						     sizeof(prEnhDataStr->rRxInfo));
-					glResetTrigger(prAdapter);
-					return;
+					ASSERT(0);
+					break;
 				}
-				u4RxLength = ALIGN_4(u4RxLength + HIF_RX_HW_APPENDED_LEN);
-				if (u4RxAvailAggLen >= u4RxLength) {
-					u4RxAvailAggLen -= u4RxLength;
-					u4RxAggLength += u4RxLength;
-				} else {
+
+				if (ALIGN_4(u4RxLength + HIF_RX_HW_APPENDED_LEN) < u4RxAvailAggLen) {
+					if (u4RxAggCount < u4CurrAvailFreeRfbCnt) {
+						u4RxAvailAggLen -= ALIGN_4(u4RxLength + HIF_RX_HW_APPENDED_LEN);
+						u4RxAggCount++;
+						continue;
+					}
+					/* no FreeSwRfb for rx packet */
 					DBGLOG(RX, ERROR,
-					       "SDIO buf len is more than cache len, needs chip reset.\n");
-					DBGLOG_MEM32(RX, WARN, (PUINT_32)&prEnhDataStr->rRxInfo,
-						     sizeof(prEnhDataStr->rRxInfo));
-					glResetTrigger(prAdapter);
-					return;
+					       "[%s] RxAggCount(%d) is greater than AvailableFreeCount(%d)\n",
+					       __func__, u4RxAggCount, u4CurrAvailFreeRfbCnt);
+					ASSERT(0);
+					break;
 				}
+
+				/* CFG_RX_COALESCING_BUFFER_SIZE is not large enough */
+				DBGLOG(RX, ERROR,
+				       "[%s] Request_len(%d) is greater than Available_len(%d)\n",
+				       __func__,
+				       (ALIGN_4(u4RxLength + HIF_RX_HW_APPENDED_LEN)), u4RxAvailAggLen);
+				u4RxLength += (CFG_RX_COALESCING_BUFFER_SIZE - u4RxAvailAggLen);
+				pucZeroArray = kalMemAlloc(1000, VIR_MEM_TYPE);
+				if (!pucZeroArray)
+					break;
+				kalMemZero(pucZeroArray, 1000);
+				HAL_READ_RX_PORT(prAdapter, rxNum, CFG_RX_COALESCING_BUFFER_SIZE,
+						prRxCtrl->pucRxCoalescingBufPtr, CFG_RX_COALESCING_BUFFER_SIZE);
+				/* dump RXD if total u4RxLength is greater than u4RxAvailAggLen */
+				DBGLOG(RX, ERROR,
+					"RXD for the wrong packet is\n");
+				DBGLOG_MEM32(RX, ERROR, prRxCtrl->pucRxCoalescingBufPtr+
+					(CFG_RX_COALESCING_BUFFER_SIZE - u4RxAvailAggLen),
+					sizeof(HW_MAC_RX_DESC_T));
+				u4RxLength -= CFG_RX_COALESCING_BUFFER_SIZE;
+				/* we should read out all pending data, otherwise,
+					DE said the port will be in abnormal case */
+				while (CFG_RX_COALESCING_BUFFER_SIZE < u4RxLength) {
+					HAL_READ_RX_PORT(prAdapter, rxNum, CFG_RX_COALESCING_BUFFER_SIZE,
+						prRxCtrl->pucRxCoalescingBufPtr, CFG_RX_COALESCING_BUFFER_SIZE);
+					/* if continuous 1000 bytes were zeros, means there's no data in this port */
+					if (!kalMemCmp(pucZeroArray, prRxCtrl->pucRxCoalescingBufPtr, 1000)) {
+						kalMemFree(pucZeroArray, VIR_MEM_TYPE, 1000);
+						goto restart;
+					}
+				}
+				if (u4RxLength > 0) {
+					HAL_READ_RX_PORT(prAdapter, rxNum, ALIGN_4(u4RxLength + HIF_RX_HW_APPENDED_LEN),
+							prRxCtrl->pucRxCoalescingBufPtr, CFG_RX_COALESCING_BUFFER_SIZE);
+				}
+				kalMemFree(pucZeroArray, VIR_MEM_TYPE, 1000);
+				goto restart;
 			}
 
-			HAL_READ_RX_PORT(prAdapter, rxNum, u4RxAggLength,
-					 prRxCtrl->pucRxCoalescingBufPtr, CFG_RX_COALESCING_BUFFER_SIZE);
+			u4RxAggLength = (CFG_RX_COALESCING_BUFFER_SIZE - u4RxAvailAggLen);
+			/* DBGLOG(RX, INFO, ("u4RxAggCount = %d, u4RxAggLength = %d\n", */
+			/* u4RxAggCount, u4RxAggLength)); */
+
+			HAL_READ_RX_PORT(prAdapter,
+					 rxNum,
+					 u4RxAggLength, prRxCtrl->pucRxCoalescingBufPtr, CFG_RX_COALESCING_BUFFER_SIZE);
+			if (!fgResult) {
+				DBGLOG(RX, ERROR, "Read RX Agg Packet Error\n");
+				continue;
+			}
 
 			pucSrcAddr = prRxCtrl->pucRxCoalescingBufPtr;
-			for (i = 0; i < u2RxPktNum; i++) {
-				u4RxLength = ALIGN_4((rxNum == 0 ?
-					       prEnhDataStr->rRxInfo.u.au2Rx0Len[i] :
-					       prEnhDataStr->rRxInfo.u.au2Rx1Len[i]) + HIF_RX_HW_APPENDED_LEN);
+			for (i = 0; i < u4RxAggCount; i++) {
+				UINT_16 u2PktLength;
 
-				if (u4RxLength > CFG_RX_MAX_PKT_SIZE) {
-					DBGLOG(RX, WARN,
-					       "FIH RX(%d) packets(%d)'s length in reg(%d) and in DESC(%d)...\n",
-					       rxNum, i, u4RxLength, ((HW_MAC_RX_DESC_T *)pucSrcAddr)->u2RxByteCount);
+				u2PktLength = (rxNum == 0 ?
+					       prEnhDataStr->rRxInfo.u.au2Rx0Len[i] :
+					       prEnhDataStr->rRxInfo.u.au2Rx1Len[i]);
+
+				if (ALIGN_4(u2PktLength + HIF_RX_HW_APPENDED_LEN) > CFG_RX_MAX_PKT_SIZE) {
+					DBGLOG(RX, ERROR,
+					       "[%s] Request_len(%d) is greater than CFG_RX_MAX_PKT_SIZE(%d)...",
+					       __func__, (ALIGN_4(u2PktLength + HIF_RX_HW_APPENDED_LEN)),
+					       CFG_RX_MAX_PKT_SIZE);
+					DBGLOG(RX, ERROR, "Drop the unexpected packet...\n");
+					DBGLOG_MEM32(RX, ERROR, pucSrcAddr, sizeof(HW_MAC_RX_DESC_T));
+
+					pucSrcAddr += ALIGN_4(u2PktLength + HIF_RX_HW_APPENDED_LEN);
 					RX_INC_CNT(prRxCtrl, RX_DROP_TOTAL_COUNT);
-					pucSrcAddr += u4RxLength;
 					continue;
 				}
+
 				KAL_ACQUIRE_SPIN_LOCK(prAdapter, SPIN_LOCK_RX_FREE_QUE);
 				QUEUE_REMOVE_HEAD(&prRxCtrl->rFreeSwRfbList, prSwRfb, P_SW_RFB_T);
 				KAL_RELEASE_SPIN_LOCK(prAdapter, SPIN_LOCK_RX_FREE_QUE);
 
-				if (!prSwRfb) {
-					DBGLOG(RX, WARN, "No Free SwRfb, ignorge this packet\n");
-					RX_INC_CNT(prRxCtrl, RX_DROP_TOTAL_COUNT);
-					pucSrcAddr += u4RxLength;
-					continue;
-				}
-				kalMemCopy(prSwRfb->pucRecvBuff, pucSrcAddr, u4RxLength);
+				ASSERT(prSwRfb);
+				kalMemCopy(prSwRfb->pucRecvBuff, pucSrcAddr,
+					   ALIGN_4(u2PktLength + HIF_RX_HW_APPENDED_LEN));
 
 				/* prHifRxHdr = prSwRfb->prHifRxHdr; */
 				/* ASSERT(prHifRxHdr); */
@@ -3278,7 +3333,8 @@ VOID nicRxSDIOAggReceiveRFBs(IN P_ADAPTER_T prAdapter)
 				QUEUE_INSERT_TAIL(&prRxCtrl->rReceivedRfbList, &prSwRfb->rQueEntry);
 				RX_INC_CNT(prRxCtrl, RX_MPDU_TOTAL_COUNT);
 				KAL_RELEASE_SPIN_LOCK(prAdapter, SPIN_LOCK_RX_QUE);
-				pucSrcAddr += u4RxLength;
+
+				pucSrcAddr += ALIGN_4(u2PktLength + HIF_RX_HW_APPENDED_LEN);
 				/* prEnhDataStr->au4RxLength[i] = 0; */
 			}
 

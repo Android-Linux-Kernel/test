@@ -1,6 +1,6 @@
 /* linux/drivers/hwmon/adxl345.c
  *
- * (C) Copyright 2008 
+ * (C) Copyright 2008
  * MediaTek <www.mediatek.com>
  *
  * KXTJ2_1009 driver for MT6575
@@ -21,11 +21,11 @@
  */
 #ifndef KXTJ2_1009_H
 #define KXTJ2_1009_H
-	 
+
 #include <linux/ioctl.h>
-	 
+
 #define KXTJ2_1009_I2C_SLAVE_ADDR		0x1C
-	 
+
  /* KXTJ2_1009 Register Map  (Please refer to KXTJ2_1009 Specifications) */
 #define KXTJ2_1009_REG_DEVID			0x0F
 #define	KXTJ2_1009_REG_BW_RATE			0x21
@@ -35,12 +35,12 @@
 #define KXTJ2_1009_REG_DATA_FORMAT		0x1B
 #define KXTJ2_1009_REG_DATA_RESOLUTION		0x1B
 #define KXTJ2_1009_RANGE_DATA_RESOLUTION_MASK	0x40
-#define KXTJ2_1009_REG_DATAX0			0x06	 
-#define KXTJ2_1009_FIXED_DEVID			0x09	 
+#define KXTJ2_1009_REG_DATAX0			0x06
+#define KXTJ2_1009_FIXED_DEVID			0x09
 #define KXTJ2_1009_BW_200HZ				0x05
 #define KXTJ2_1009_BW_100HZ				0x04
-#define KXTJ2_1009_BW_50HZ				0x03	 
-#define KXTJ2_1009_MEASURE_MODE		0x80		 
+#define KXTJ2_1009_BW_50HZ				0x03
+#define KXTJ2_1009_MEASURE_MODE		0x80
 #define KXTJ2_1009_RANGE_MASK		0x18
 #define KXTJ2_1009_RANGE_2G			0x00
 #define KXTJ2_1009_RANGE_4G			0x08
@@ -48,19 +48,19 @@
 #define KXTJ2_1009_REG_INT_ENABLE	0x1E
 
 #define KXTJ2_1009_SELF_TEST           0x10
-	 	 
-	 
+
+
 #define KXTJ2_1009_SUCCESS						0
 #define KXTJ2_1009_ERR_I2C						-1
 #define KXTJ2_1009_ERR_STATUS					-3
 #define KXTJ2_1009_ERR_SETUP_FAILURE				-4
 #define KXTJ2_1009_ERR_GETGSENSORDATA			-5
 #define KXTJ2_1009_ERR_IDENTIFICATION			-6
-	 
-	 
-	 
+
+
+
 #define KXTJ2_1009_BUFSIZE				256
-	 
+
 #define KXTJ2_1009_AXES_NUM        3
 
 /*----------------------------------------------------------------------------*/
@@ -72,27 +72,27 @@ typedef enum{
 /*----------------------------------------------------------------------------*/
 typedef struct
 {
-    unsigned short    action;
+    uint16_t    action;
 }KXTJ2_1009_CUST;
 /*----------------------------------------------------------------------------*/
 typedef struct
 {
-    unsigned short    action;
-    unsigned short    part;
-    int     data[0];
+    uint16_t    action;
+    uint16_t    part;
+    int32_t     data[0];
 }KXTJ2_1009_SET_CUST;
 /*----------------------------------------------------------------------------*/
 typedef struct
 {
-    unsigned short    action;
-    int     data[KXTJ2_1009_AXES_NUM];
+    uint16_t    action;
+    int32_t     data[KXTJ2_1009_AXES_NUM];
 }KXTJ2_1009_SET_CALI;
 /*----------------------------------------------------------------------------*/
 typedef KXTJ2_1009_CUST KXTJ2_1009_RESET_CALI;
 /*----------------------------------------------------------------------------*/
 typedef union
 {
-    unsigned int                data[10];
+    uint32_t                data[10];
     KXTJ2_1009_CUST         cust;
     KXTJ2_1009_SET_CUST     setCust;
     KXTJ2_1009_SET_CALI     setCali;

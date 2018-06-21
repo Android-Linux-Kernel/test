@@ -19,7 +19,9 @@ obj-$(CONFIG_MTK_APM_16D)	+=  apm_16d/
 obj-$(CONFIG_MTK_EPL2182)	+=  epl2182/
 obj-$(CONFIG_MTK_EPL2182_NEW)	+=  EPL2182-new/
 obj-$(CONFIG_MTK_STK3X1X)	+=  stk3x1x/
+##del alps sensor --shenyong@wind-mobi.com start
 #obj-y	+=  cm36652-new/
+##del alps sensor --shenyong@wind-mobi.com del
 obj-$(CONFIG_MTK_CM36686_NEW)	+=  cm36686-new/
 obj-$(CONFIG_MTK_APDS9930)	+=  APDS9930/
 obj-$(CONFIG_MTK_CM3232_NEW)	+=  cm3232-new/
@@ -29,5 +31,4 @@ obj-$(CONFIG_MTK_RPR410)	+=  rpr410/
 obj-$(CONFIG_MTK_TMD2771)	+=  tmd2771/
 obj-$(CONFIG_MTK_TMD2771_AUTO)	+=  tmd2771_auto/
 obj-$(CONFIG_MTK_STK3X1X_NEW)	+=  stk3x1x-new/
-obj-$(CONFIG_MTK_LTR559)    +=  ltr559/
 endif

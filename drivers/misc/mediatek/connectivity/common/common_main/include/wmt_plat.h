@@ -229,11 +229,13 @@ typedef enum _ENUM_CHIP_DUMP_STATE_T {
 #define CONSYS_CPU_CLK_STATUS_OFFSET	0x0000010c
 #define CONSYS_DBG_CR1_OFFSET		0x00000408
 #define CONSYS_DBG_CR2_OFFSET		0x0000040c
+#define CONSYS_DBG_CR3_OFFSET		0x00000110
 typedef enum _ENUM_CONNSYS_DEBUG_CR {
 	CONNSYS_CPU_CLK = 0,
 	CONNSYS_BUS_CLK = 1,
 	CONNSYS_DEBUG_CR1 = 2,
 	CONNSYS_DEBUG_CR2 = 3,
+	CONNSYS_DEBUG_CR3 = 4,
 	CONNSYS_CR_MAX
 } ENUM_CONNSYS_DEBUG_CR, *P_ENUM_CONNSYS_DEBUG_CR;
 
@@ -344,6 +346,8 @@ MTK_WCN_BOOL wmt_plat_dump_BGF_irq_status(VOID);
 #endif
 P_CONSYS_EMI_ADDR_INFO wmt_plat_get_emi_phy_add(VOID);
 UINT32 wmt_plat_read_cpupcr(VOID);
+VOID wmt_plat_cpu_sw_rst(VOID);
+VOID wmt_plat_cpu_sw_rst_deassert(VOID);
 UINT32 wmt_plat_read_dmaregs(UINT32);
 INT32 wmt_plat_set_host_dump_state(ENUM_HOST_DUMP_STATE state);
 UINT32 wmt_plat_force_trigger_assert(ENUM_FORCE_TRG_ASSERT_T type);

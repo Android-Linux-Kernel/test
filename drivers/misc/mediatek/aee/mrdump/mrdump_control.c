@@ -17,7 +17,12 @@
 #include <mt-plat/mrdump.h>
 #include "mrdump_private.h"
 
-#ifdef CONFIG_MTK_AEE_MRDUMP
+/*kernel-3.10 and kernel-3.18 have ARCH define style CONFIG_ARCH_MTXXXX */
+
+#if ((defined(CONFIG_ARCH_MT6795) || defined(CONFIG_ARCH_MT6752) || defined(CONFIG_ARCH_MT6580)\
+			|| defined(CONFIG_ARCH_MT6735) || defined(CONFIG_ARCH_MT6735M) || defined(CONFIG_ARCH_MT6753)\
+			|| defined(CONFIG_ARCH_MT6755) || defined(CONFIG_ARCH_MT6797) || defined(CONFIG_ARCH_MT6570))\
+			&& defined(CONFIG_MTK_AEE_MRDUMP))
 mrdump_rsvmem_block_t __initdata rsvmem_block[16];
 
 static __init char *find_next_mrdump_rsvmem(char *p, int len)
@@ -36,7 +41,6 @@ static __init char *find_next_mrdump_rsvmem(char *p, int len)
 	}
 	return tmp_p + 1;
 }
-
 static int __init early_mrdump_rsvmem(char *p)
 {
 	unsigned long start_addr, size;
@@ -58,6 +62,7 @@ static int __init early_mrdump_rsvmem(char *p)
 			pr_alert("%s:i=%d start_addr = 0x%lx size=0x%lx skip\n", __func__, i, start_addr, size);
 			continue;
 		}
+
 		rsvmem_block[i].start_addr = start_addr;
 		rsvmem_block[i].size = size;
 		i++;
@@ -85,14 +90,6 @@ __init void mrdump_rsvmem(void)
 			if (!memblock_is_region_reserved(rsvmem_block[i].start_addr, rsvmem_block[i].size))
 				memblock_reserve(rsvmem_block[i].start_addr, rsvmem_block[i].size);
 			else {
-			       /*even conflict , we still enable MRDUMP for temp
-				* because MINI DUMP will reserve the memory in DTSI now
-				* */
-#if 0
-			       mrdump_rsv_conflict = 1;
-			       mrdump_enable = 0;
-#endif
-
 				pr_warn(" mrdump region start = %pa size =%pa is reserved already\n",
 						&rsvmem_block[i].start_addr, &rsvmem_block[i].size);
 			}

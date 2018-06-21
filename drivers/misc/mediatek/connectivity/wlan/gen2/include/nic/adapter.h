@@ -160,8 +160,11 @@ typedef struct _CONNECTION_SETTINGS_T {
 
 	/* for RSN info store, when upper layer set rsn info */
 	RSN_INFO_T rRsnInfo;
-
+#if CFG_SUPPORT_OKC
 	BOOLEAN fgUseOkc;
+	BOOLEAN fgOkcPmkIdValid;
+	UINT_8 aucOkcPmkId[16];
+#endif
 	struct LINK_MGMT rBlackList;
 } CONNECTION_SETTINGS_T, *P_CONNECTION_SETTINGS_T;
 
@@ -589,7 +592,6 @@ struct PERF_MONITOR_T {
 	UINT32 u4UpdatePeriod; /*in ms*/
 	UINT32 u4TarPerfLevel;
 	UINT32 u4CurrPerfLevel;
-	UINT8 u1ShutdownCoreCount;
 };
 
 /*
@@ -826,10 +828,6 @@ struct _ADAPTER_T {
 	UINT_32 u4AirDelayTotal;	/*  dbg privilege power mode, always keep in active */
 	ULONG	ulSuspendFlag;
 	struct PERF_MONITOR_T rPerMonitor;
-
-#ifdef CFG_TC1_FEATURE /* for Passive Scan */
-	UINT_8 ucScanType;
-#endif
 };				/* end of _ADAPTER_T */
 
 /*******************************************************************************
@@ -907,8 +905,6 @@ struct _ADAPTER_T {
 #define THROUGHPUT_L1_THRESHOLD		(20*1024*1024)
 #define THROUGHPUT_L2_THRESHOLD		(60*1024*1024)
 #define THROUGHPUT_L3_THRESHOLD		(135*1024*1024)
-
-#define THROUGHPUT_SHUTDOWN_CORE_COUNT	5
 
 /*----------------------------------------------------------------------------*/
 /* Macros for Power State                                                     */

@@ -104,6 +104,9 @@ usb_acm_temp_device,
 extern void fan5405_set_opa_mode(unsigned int val);
 extern void fan5405_set_otg_pl(unsigned int val);
 extern void fan5405_set_otg_en(unsigned int val);
+//zhanyoufei@wind-mobi.com 20161209 begin
+extern int mt_get_gpio_in(int val);
+//zhanyoufei@wind-mobi.com 20161209 end
 extern unsigned int fan5405_reg_config_interface(unsigned char RegNum, unsigned char val);
 #elif defined(CONFIG_MTK_BQ24261_SUPPORT)
 extern void bq24261_set_en_boost(unsigned int val);
@@ -112,9 +115,6 @@ extern void bq24296_set_otg_config(unsigned int val);
 extern void bq24296_set_boostv(unsigned int val);
 extern void bq24296_set_boost_lim(unsigned int val);
 extern void bq24296_set_en_hiz(unsigned int val);
-#elif defined(CONFIG_MTK_SM5414_SUPPORT)
-extern void sm5414_otg_enable(unsigned int enable);
-extern void sm5414_set_votg(unsigned int val);
 #elif defined(CONFIG_MTK_BQ24196_SUPPORT)
 extern void bq24196_set_otg_config(unsigned int val);
 extern void bq24196_set_boost_lim(unsigned int val);

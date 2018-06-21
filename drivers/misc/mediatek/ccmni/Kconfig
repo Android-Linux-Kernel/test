@@ -5,3 +5,7 @@ config MTK_NET_CCMNI
 	select WIRELESS_EXT
 	select WEXT_PRIV
 
+config MTK_IRAT_SUPPORT
+	bool "MTK_IRAT_SUPPORT"
+	depends on MTK_NET_CCMNI
+	default n

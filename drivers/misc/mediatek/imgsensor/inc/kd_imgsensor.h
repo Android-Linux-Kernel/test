@@ -122,7 +122,6 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define IMX258_MONO_SENSOR_ID                   0x0259
 #define IMX230_SENSOR_ID                        0x0230
 #define IMX220_SENSOR_ID                        0x0220
-#define IMX219_SENSOR_ID                        0x0219
 #define IMX214_SENSOR_ID                        0x0214
 #define IMX214_MONO_SENSOR_ID                   0x0215
 #define IMX179_SENSOR_ID                        0x0179
@@ -145,14 +144,12 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define OV9726_SENSOR_ID                        0x9726
 #define OV9726MIPI_SENSOR_ID                    0x9726
 #define OV8865_SENSOR_ID                        0x8865
-#define OV5695MIPI_SENSOR_ID                    0x5695 /* jianwei.luo front sensor ov5695 id **/
 #define OV8858_SENSOR_ID                        0x8858
 #define OV8858S_SENSOR_ID                      (0x8858+1)
 #define OV8830_SENSOR_ID                        0x8830
 #define OV8825_SENSOR_ID                        0x8825
 #define OV7675_SENSOR_ID                        0x7673
 #define OV5693_SENSOR_ID                        0x5690
-#define OV5693_SENSOR_ID_2                  (0x5690+10000)
 #define OV5670MIPI_SENSOR_ID                    0x5670
 #define OV5670MIPI_SENSOR_ID_2                  (0x5670+010000)
 #define OV5671MIPI_SENSOR_ID                    0x5671
@@ -177,16 +174,14 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define OV2650_SENSOR_ID_3                      0x2655
 /*S5K*/
 #define S5K2L7_SENSOR_ID                        0x20C7
-#define S5K3L8_SENSOR_ID                        0x30C8 /* jianwei.luo back sensor s5k3l8 id **/
-#define S5K3L8B_SENSOR_ID                       0x30C9 /* jianwei.luo back sensor s5k3l8b id **/
+#define S5K3L8_SENSOR_ID                        0x30C8
 #define S5K2X8_SENSOR_ID                        0x2188
 #define S5K2P8_SENSOR_ID                        0x2108
 #define S5K3P3SX_SENSOR_ID                      0x3103
 #define S5K3M2_SENSOR_ID                        0x30D2
-#define S5K4E6_SENSOR_ID                        0x4e60
 #define S5K3AAEA_SENSOR_ID                      0x07AC
 #define S5K3BAFB_SENSOR_ID                      0x7070
-#define S5K3H7YX_SENSOR_ID                      0x3087 /* jianwei.luo back sensor 35k3h7yx id **/
+#define S5K3H7Y_SENSOR_ID                       0x3087
 #define S5K3H2YX_SENSOR_ID                      0x382b
 #define S5KA3DFX_SENSOR_ID                      0x00AB
 #define S5K3E2FX_SENSOR_ID                      0x3E2F
@@ -244,7 +239,6 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define MT9P017MIPI_SENSOR_ID                   0x4800
 #define MT9T113MIPI_SENSOR_ID                   0x4680
 /*GC*/
-#define GC2355_SENSOR_ID                        0x2355
 #define GC2235_SENSOR_ID                        0x2235
 #define GC2035_SENSOR_ID                        0x2035
 #define GC2145_SENSOR_ID                        0x2145
@@ -287,7 +281,18 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 /*Others*/
 #define SHARP3D_SENSOR_ID                       0x003d
 #define T8EV5_SENSOR_ID                         0x1011
-
+//luminjie@wind-mobi.com 20161212 begin
+#define IMX219_SENSOR_ID                        0x0219
+#define S5K4H8_SENSOR_ID                        0x4088
+//luminjie@wind-mobi.com 20170613 begin
+#define S5K4H8_SENSOR_ID_QT                     0x4088+1
+#define S5K4H8_SENSOR_ID_HLT                    0x4088+2
+#define S5K4H8_SENSOR_ID_BLX                    0x4088+3
+//luminjie@wind-mobi.com 20170613 end
+#define SP2509MIPI_SENSOR_ID					0x2509
+#define GC2355_SENSOR_ID                        0x2355
+#define GC2375_SENSOR_ID                        0x2375
+//luminjie@wind-mobi.com 20161212 end
 /* CAMERA DRIVER NAME */
 #define CAMERA_HW_DEVNAME                       "kd_camera_hw"
 /* SENSOR DEVICE DRIVER NAME */
@@ -301,7 +306,6 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define SENSOR_DRVNAME_IMX258_MIPI_MONO         "imx258mipimono"
 #define SENSOR_DRVNAME_IMX230_MIPI_RAW          "imx230mipiraw"
 #define SENSOR_DRVNAME_IMX220_MIPI_RAW          "imx220mipiraw"
-#define SENSOR_DRVNAME_IMX219_MIPI_RAW          "imx219mipiraw"
 #define SENSOR_DRVNAME_IMX214_MIPI_MONO         "imx214mipimono"
 #define SENSOR_DRVNAME_IMX214_MIPI_RAW          "imx214mipiraw"
 #define SENSOR_DRVNAME_IMX179_MIPI_RAW          "imx179mipiraw"
@@ -323,14 +327,12 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define SENSOR_DRVNAME_0V9726_RAW               "ov9726raw"
 #define SENSOR_DRVNAME_OV9726_MIPI_RAW          "ov9726mipiraw"
 #define SENSOR_DRVNAME_OV8865_MIPI_RAW          "ov8865mipiraw"
-#define SENSOR_DRVNAME_OV5695_MIPI_RAW          "ov5695mipi"	/* jianwei.luo front sensor ov5695 name **/
 #define SENSOR_DRVNAME_OV8858_MIPI_RAW          "ov8858mipiraw"
 #define SENSOR_DRVNAME_OV8858S_MIPI_RAW         "ov8858smipiraw"
 #define SENSOR_DRVNAME_OV8830_RAW               "ov8830"
 #define SENSOR_DRVNAME_OV8825_MIPI_RAW          "ov8825mipiraw"
 #define SENSOR_DRVNAME_OV7675_YUV               "ov7675yuv"
-#define SENSOR_DRVNAME_OV5693_MIPI_RAW          "ov5693mipiraw"
-#define SENSOR_DRVNAME_OV5693_MIPI_RAW_2          "ov5693mipiraw2"
+#define SENSOR_DRVNAME_OV5693_MIPI_RAW          "ov5693mipi"
 #define SENSOR_DRVNAME_OV5670_MIPI_RAW          "ov5670mipiraw"
 #define SENSOR_DRVNAME_OV5670_MIPI_RAW_2        "ov5670mipiraw2"
 #define SENSOR_DRVNAME_OV5671_MIPI_RAW          "ov5671mipiraw"
@@ -357,15 +359,13 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define SENSOR_DRVNAME_OV2650_RAW               "ov265x"
 /*S5K*/
 #define SENSOR_DRVNAME_S5K2L7_MIPI_RAW          "s5k2l7mipiraw"
-#define SENSOR_DRVNAME_S5K3L8_MIPI_RAW          "s5k3l8mipiraw" /* jianwei.luo back sensor s5k3l8 name **/
-#define SENSOR_DRVNAME_S5K3L8B_MIPI_RAW          "s5k3l8bmipiraw" /* jianwei.luo back sensor s5k3l8b name **/
+#define SENSOR_DRVNAME_S5K3L8_MIPI_RAW          "s5k3l8mipiraw"
 #define SENSOR_DRVNAME_S5K2X8_MIPI_RAW          "s5k2x8mipiraw"
 #define SENSOR_DRVNAME_S5K2P8_MIPI_RAW          "s5k2p8mipiraw"
 #define SENSOR_DRVNAME_S5K3P3SX_MIPI_RAW      "s5k3p3sxmipiraw"
 #define SENSOR_DRVNAME_S5K3M2_MIPI_RAW          "s5k3m2mipiraw"
-#define SENSOR_DRVNAME_S5K4E6_MIPI_RAW          "s5k4e6mipiraw"
 #define SENSOR_DRVNAME_S5K3H2YX_MIPI_RAW        "s5k3h2yxmipiraw"
-#define SENSOR_DRVNAME_S5K3H7YX_MIPI_RAW        "s5k3h7yxmipiraw" /* jianwei.luo back sensor s5k3h7yx name **/
+#define SENSOR_DRVNAME_S5K3H7Y_MIPI_RAW         "s5k3h7ymipiraw"
 #define SENSOR_DRVNAME_S5K4H5YC_MIPI_RAW        "s5k4h5ycmipiraw"
 #define SENSOR_DRVNAME_S5K4E1GA_MIPI_RAW        "s5k4e1gamipiraw"
 #define SENSOR_DRVNAME_S5K4ECGX_MIPI_YUV        "s5k4ecgxmipiyuv"
@@ -401,7 +401,6 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 /*GC*/
 #define SENSOR_DRVNAME_GC2035_YUV               "gc2035_yuv"
 #define SENSOR_DRVNAME_GC2235_RAW               "gc2235_raw"
-#define SENSOR_DRVNAME_GC2355_MIPI_RAW          "gc2355mipiraw"
 #define SENSOR_DRVNAME_GC0330_YUV               "gc0330_yuv"
 #define SENSOR_DRVNAME_GC0329_YUV               "gc0329yuv"
 #define SENSOR_DRVNAME_GC2145_MIPI_YUV          "gc2145mipiyuv"
@@ -433,7 +432,19 @@ NSFeature :  : RAWSensorInfo < _id >  :  : getFlickerPara \
 #define SENSOR_DRVNAME_T8EV5_YUV                "t8ev5_yuv"
 /*Test*/
 #define SENSOR_DRVNAME_IMX135_MIPI_RAW_5MP      "imx135mipiraw5mp"
-
+#define SENSOR_DRVNAME_IMX135_MIPI_RAW_8MP      "imx135mipiraw8mp"
+//luminjie@wind-mobi.com 20161212 begin
+#define SENSOR_DRVNAME_IMX219_MIPI_RAW          "imx219mipiraw"
+#define SENSOR_DRVNAME_S5K4H8_MIPI_RAW          "s5k4h8mipiraw"
+//luminjie@wind-mobi.com 20170613 begin
+#define SENSOR_DRVNAME_S5K4H8_MIPI_RAW_QT       "s5k4h8mipirawqt"
+#define SENSOR_DRVNAME_S5K4H8_MIPI_RAW_HLT       "s5k4h8mipirawhlt"
+#define SENSOR_DRVNAME_S5K4H8_MIPI_RAW_BLX       "s5k4h8mipirawblx"
+//luminjie@wind-mobi.com 20170613 end
+#define SENSOR_DRVNAME_SP2509_MIPI_RAW         	"sp2509mipiraw"
+#define SENSOR_DRVNAME_GC2355_MIPI_RAW          "gc2355mipiraw"
+#define SENSOR_DRVNAME_GC2375_MIPI_RAW          "gc2375mipiraw"
+//luminjie@wind-mobi.com 20161212 end
 /*******************************************************************************
 *
 ********************************************************************************/

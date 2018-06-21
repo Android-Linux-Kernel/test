@@ -31,7 +31,6 @@
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include "kd_camera_typedef.h"
-#include "mt_gpio.h"//miaowei add
 #include <linux/hrtimer.h>
 #include <linux/ktime.h>
 #include <linux/version.h>
@@ -43,7 +42,7 @@
 
 /******************************************************************************
  * Debug configuration
- ******************************************************************************/
+******************************************************************************/
 /* availible parameter */
 /* ANDROID_LOG_ASSERT */
 /* ANDROID_LOG_ERROR */
@@ -51,12 +50,6 @@
 /* ANDROID_LOG_INFO */
 /* ANDROID_LOG_DEBUG */
 /* ANDROID_LOG_VERBOSE */
-
-/*miaowei--151224=modify start*/
-#define GPIO_CAMERA_FLASH_EN_PIN     (43 | 0x80000000)
-#define GPIO_CAMERA_TORCH_EN_PIN     (44 | 0x80000000)
-//#define GPIO60_TORCH 60
-/*miaowei--151224=modify end*/
 
 #define TAG_NAME "[leds_strobe.c]"
 #define PK_DBG_NONE(fmt, arg...)    do {} while (0)
@@ -68,10 +61,10 @@
 #else
 #define PK_DBG(a, ...)
 #endif
-unsigned int  rgt_torch_level=0;
+
 /******************************************************************************
  * local variables
- ******************************************************************************/
+******************************************************************************/
 
 static DEFINE_SPINLOCK(g_strobeSMPLock);	/* cotta-- SMP proection */
 
@@ -94,11 +87,11 @@ static struct work_struct workTimeOut;
 /* #define FLASH_GPIO_ENF GPIO12 */
 /* #define FLASH_GPIO_ENT GPIO13 */
 
-//static int g_bLtVersion;
+static int g_bLtVersion;
 
 /*****************************************************************************
-  Functions
- *****************************************************************************/
+Functions
+*****************************************************************************/
 static void work_timeOutFunc(struct work_struct *data);
 
 static struct i2c_client *LM3642_i2c_client;
@@ -107,54 +100,52 @@ static struct i2c_client *LM3642_i2c_client;
 
 
 struct LM3642_platform_data {
-    u8 torch_pin_enable;	/* 1:  TX1/TORCH pin isa hardware TORCH enable */
-    u8 pam_sync_pin_enable;	/* 1:  TX2 Mode The ENVM/TX2 is a PAM Sync. on input */
-    u8 thermal_comp_mode_enable;	/* 1: LEDI/NTC pin in Thermal Comparator Mode */
-    u8 strobe_pin_disable;	/* 1 : STROBE Input disabled */
-    u8 vout_mode_enable;	/* 1 : Voltage Out Mode enable */
+	u8 torch_pin_enable;	/* 1:  TX1/TORCH pin isa hardware TORCH enable */
+	u8 pam_sync_pin_enable;	/* 1:  TX2 Mode The ENVM/TX2 is a PAM Sync. on input */
+	u8 thermal_comp_mode_enable;	/* 1: LEDI/NTC pin in Thermal Comparator Mode */
+	u8 strobe_pin_disable;	/* 1 : STROBE Input disabled */
+	u8 vout_mode_enable;	/* 1 : Voltage Out Mode enable */
 };
 
 struct LM3642_chip_data {
-    struct i2c_client *client;
+	struct i2c_client *client;
 
-    /* struct led_classdev cdev_flash; */
-    /* struct led_classdev cdev_torch; */
-    /* struct led_classdev cdev_indicator; */
+	/* struct led_classdev cdev_flash; */
+	/* struct led_classdev cdev_torch; */
+	/* struct led_classdev cdev_indicator; */
 
-    struct LM3642_platform_data *pdata;
-    struct mutex lock;
+	struct LM3642_platform_data *pdata;
+	struct mutex lock;
 
-    u8 last_flag;
-    u8 no_pdata;
+	u8 last_flag;
+	u8 no_pdata;
 };
 
-#if 0
 static int LM3642_write_reg(struct i2c_client *client, u8 reg, u8 val)
 {
-    int ret = 0;
-    struct LM3642_chip_data *chip = i2c_get_clientdata(client);
+	int ret = 0;
+	struct LM3642_chip_data *chip = i2c_get_clientdata(client);
 
-    mutex_lock(&chip->lock);
-    ret = i2c_smbus_write_byte_data(client, reg, val);
-    mutex_unlock(&chip->lock);
+	mutex_lock(&chip->lock);
+	ret = i2c_smbus_write_byte_data(client, reg, val);
+	mutex_unlock(&chip->lock);
 
-    if (ret < 0)
-        PK_DBG("failed writing at 0x%02x\n", reg);
-    return ret;
+	if (ret < 0)
+		PK_DBG("failed writing at 0x%02x\n", reg);
+	return ret;
 }
-#endif
 
 static int LM3642_read_reg(struct i2c_client *client, u8 reg)
 {
-    int val = 0;
-    struct LM3642_chip_data *chip = i2c_get_clientdata(client);
+	int val = 0;
+	struct LM3642_chip_data *chip = i2c_get_clientdata(client);
 
-    mutex_lock(&chip->lock);
-    val = i2c_smbus_read_byte_data(client, reg);
-    mutex_unlock(&chip->lock);
+	mutex_lock(&chip->lock);
+	val = i2c_smbus_read_byte_data(client, reg);
+	mutex_unlock(&chip->lock);
 
 
-    return val;
+	return val;
 }
 
 
@@ -164,97 +155,97 @@ static int LM3642_chip_init(struct LM3642_chip_data *chip)
 {
 
 
-    return 0;
+	return 0;
 }
 
 static int LM3642_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
-    struct LM3642_chip_data *chip;
-    struct LM3642_platform_data *pdata = client->dev.platform_data;
+	struct LM3642_chip_data *chip;
+	struct LM3642_platform_data *pdata = client->dev.platform_data;
 
-    int err = -1;
+	int err = -1;
 
-    PK_DBG("LM3642_probe start--->.\n");
+	PK_DBG("LM3642_probe start--->.\n");
 
-    if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
-        err = -ENODEV;
-        PK_DBG("LM3642 i2c functionality check fail.\n");
-        return err;
-    }
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
+		err = -ENODEV;
+		PK_DBG("LM3642 i2c functionality check fail.\n");
+		return err;
+	}
 
-    chip = kzalloc(sizeof(struct LM3642_chip_data), GFP_KERNEL);
-    chip->client = client;
+	chip = kzalloc(sizeof(struct LM3642_chip_data), GFP_KERNEL);
+	chip->client = client;
 
-    mutex_init(&chip->lock);
-    i2c_set_clientdata(client, chip);
+	mutex_init(&chip->lock);
+	i2c_set_clientdata(client, chip);
 
-    if (pdata == NULL) {	/* values are set to Zero. */
-        PK_DBG("LM3642 Platform data does not exist\n");
-        pdata = kzalloc(sizeof(struct LM3642_platform_data), GFP_KERNEL);
-        chip->pdata = pdata;
-        chip->no_pdata = 1;
-    }
+	if (pdata == NULL) {	/* values are set to Zero. */
+		PK_DBG("LM3642 Platform data does not exist\n");
+		pdata = kzalloc(sizeof(struct LM3642_platform_data), GFP_KERNEL);
+		chip->pdata = pdata;
+		chip->no_pdata = 1;
+	}
 
-    chip->pdata = pdata;
-    if (LM3642_chip_init(chip) < 0)
-        goto err_chip_init;
+	chip->pdata = pdata;
+	if (LM3642_chip_init(chip) < 0)
+		goto err_chip_init;
 
-    LM3642_i2c_client = client;
-    PK_DBG("LM3642 Initializing is done\n");
+	LM3642_i2c_client = client;
+	PK_DBG("LM3642 Initializing is done\n");
 
-    return 0;
+	return 0;
 
 err_chip_init:
-    i2c_set_clientdata(client, NULL);
-    kfree(chip);
-    PK_DBG("LM3642 probe is failed\n");
-    return -ENODEV;
+	i2c_set_clientdata(client, NULL);
+	kfree(chip);
+	PK_DBG("LM3642 probe is failed\n");
+	return -ENODEV;
 }
 
 static int LM3642_remove(struct i2c_client *client)
 {
-    struct LM3642_chip_data *chip = i2c_get_clientdata(client);
+	struct LM3642_chip_data *chip = i2c_get_clientdata(client);
 
-    if (chip->no_pdata)
-        kfree(chip->pdata);
-    kfree(chip);
-    return 0;
+	if (chip->no_pdata)
+		kfree(chip->pdata);
+	kfree(chip);
+	return 0;
 }
 
 
 #define LM3642_NAME "leds-LM3642"
 static const struct i2c_device_id LM3642_id[] = {
-    {LM3642_NAME, 0},
-    {}
+	{LM3642_NAME, 0},
+	{}
 };
 
 #ifdef CONFIG_OF
 static const struct of_device_id LM3642_of_match[] = {
-    {.compatible = "mediatek,strobe_main"},
-    {},
+	{.compatible = "mediatek,strobe_main"},
+	{},
 };
 #endif
 
 static struct i2c_driver LM3642_i2c_driver = {
-    .driver = {
-        .name = LM3642_NAME,
+	.driver = {
+		   .name = LM3642_NAME,
 #ifdef CONFIG_OF
-        .of_match_table = LM3642_of_match,
+		   .of_match_table = LM3642_of_match,
 #endif
-    },
-    .probe = LM3642_probe,
-    .remove = LM3642_remove,
-    .id_table = LM3642_id,
+		   },
+	.probe = LM3642_probe,
+	.remove = LM3642_remove,
+	.id_table = LM3642_id,
 };
 static int __init LM3642_init(void)
 {
-    PK_DBG("LM3642_init\n");
-    return i2c_add_driver(&LM3642_i2c_driver);
+	PK_DBG("LM3642_init\n");
+	return i2c_add_driver(&LM3642_i2c_driver);
 }
 
 static void __exit LM3642_exit(void)
 {
-    i2c_del_driver(&LM3642_i2c_driver);
+	i2c_del_driver(&LM3642_i2c_driver);
 }
 
 
@@ -268,121 +259,94 @@ MODULE_LICENSE("GPL v2");
 int readReg(int reg)
 {
 
-    int val;
+	int val;
 
-    val = LM3642_read_reg(LM3642_i2c_client, reg);
-    return (int)val;
+	val = LM3642_read_reg(LM3642_i2c_client, reg);
+	return (int)val;
 }
 
 int FL_Enable(void)
 {
-    /*miaowei--151224=modify start*/
-#if 1
-    PK_DBG("g_duty =%d\n",g_duty);
-    if (g_duty > 0)
-    {
-        mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ONE);
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-    }
-    else
-    {
-        mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ONE);
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ONE);
+	char buf[2];
+/* char bufR[2]; */
+	if (g_duty < 0)
+		g_duty = 0;
+	else if (g_duty > 16)
+		g_duty = 16;
+	if (g_duty <= 2) {
+		int val;
 
-    }
-    /*miaowei--151224=modify end*/
-#else
-    char buf[2];
-    /* char bufR[2]; */
-    if (g_duty < 0){
-        g_duty = 0;
-    }
-    else if (g_duty > 16)
-        g_duty = 16;
-    if (g_duty <= 2) {
-        int val;
+		if (g_bLtVersion == 1) {
+			if (g_duty == 0)
+				val = 3;
+			else if (g_duty == 1)
+				val = 5;
+			else	/* if(g_duty==2) */
+				val = 7;
+		} else {
+			if (g_duty == 0)
+				val = 1;
+			else if (g_duty == 1)
+				val = 2;
+			else	/* if(g_duty==2) */
+				val = 3;
+		}
+		buf[0] = 9;
+		buf[1] = val << 4;
+		/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+		LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
 
-        if (g_bLtVersion == 1) {
-            if (g_duty == 0)
-                val = 3;
-            else if (g_duty == 1)
-                val = 5;
-            else	/* if(g_duty==2) */
-                val = 7;
-        } else {
-            if (g_duty == 0)
-                val = 1;
-            else if (g_duty == 1)
-                val = 2;
-            else	/* if(g_duty==2) */
-                val = 3;
-        }
-        buf[0] = 9;
-        buf[1] = val << 4;
-        /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-        LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+		buf[0] = 10;
+		buf[1] = 0x02;
+		/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+		LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+	} else {
+		int val;
 
-        buf[0] = 10;
-        buf[1] = 0x02;
-        /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-        LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
-    } else {
-        int val;
+		val = (g_duty - 1);
+		buf[0] = 9;
+		buf[1] = val;
+		/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+		LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
 
-        val = (g_duty - 1);
-        buf[0] = 9;
-        buf[1] = val;
-        /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-        LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+		buf[0] = 10;
+		buf[1] = 0x03;
+		/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+		LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+	}
+	PK_DBG(" FL_Enable line=%d\n", __LINE__);
 
-        buf[0] = 10;
-        buf[1] = 0x03;
-        /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-        LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
-    }
-    PK_DBG(" FL_Enable line=%d\n", __LINE__);
+	readReg(0);
+	readReg(1);
+	readReg(6);
+	readReg(8);
+	readReg(9);
+	readReg(0xa);
+	readReg(0xb);
 
-    readReg(0);
-    readReg(1);
-    readReg(6);
-    readReg(8);
-    readReg(9);
-    readReg(0xa);
-    readReg(0xb);
-#endif
-    return 0;
+	return 0;
 }
 
 
 
 int FL_Disable(void)
 {
-    /*miaowei--151224=modify start*/
-#if 1
-    //Set mode select pin and enable pin to low;
-    //	mt_set_gpio_out(GPIO60_TORCH,GPIO_OUT_ZERO);
-    mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-    mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-    /*miaowei--151224=modify end*/
-#else
-    char buf[2];
+	char buf[2];
 
-    /* ///////////////////// */
-    buf[0] = 10;
-    buf[1] = 0x00;
-    /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-    LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
-    PK_DBG(" FL_Disable line=%d\n", __LINE__);
-#endif
-    rgt_torch_level=0;
-    return 0;
+/* ///////////////////// */
+	buf[0] = 10;
+	buf[1] = 0x00;
+	/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+	LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+	PK_DBG(" FL_Disable line=%d\n", __LINE__);
+	return 0;
 }
 
 int FL_dim_duty(kal_uint32 duty)
 {
-    PK_DBG(" FL_dim_duty line=%d\n", __LINE__);
-    g_duty = duty;
-    return 0;
+	PK_DBG(" FL_dim_duty line=%d\n", __LINE__);
+	g_duty = duty;
+	return 0;
 }
 
 
@@ -390,180 +354,163 @@ int FL_dim_duty(kal_uint32 duty)
 
 int FL_Init(void)
 {
-    /*miaowei--151224=modify start*/
-#if 1
-    //	mt_set_gpio_mode(GPIO60_TORCH,GPIO_MODE_00);  // gpio mode
-    //	mt_set_gpio_dir(GPIO60_TORCH,GPIO_DIR_OUT); // output
-    //	mt_set_gpio_out(GPIO60_TORCH,GPIO_OUT_ZERO);
+	int regVal0;
+	char buf[2];
 
-    //Enable control pin.
-    mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_MODE_00);  // gpio mode
-    mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT); // output
-    mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
+	buf[0] = 0xa;
+	buf[1] = 0x0;
+	/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+	LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
 
-    //Mode select pin
-    mt_set_gpio_mode(GPIO_CAMERA_TORCH_EN_PIN,GPIO_MODE_00);  // gpio mode
-    mt_set_gpio_dir(GPIO_CAMERA_TORCH_EN_PIN,GPIO_DIR_OUT); // output
-    mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-    /*miaowei--151224=modify end*/
+	buf[0] = 0x8;
+	buf[1] = 0x47;
+	/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+	LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
 
-#else
-
-
-    int regVal0;
-    char buf[2];
-
-    buf[0] = 0xa;
-    buf[1] = 0x0;
-    /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-    LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
-
-    buf[0] = 0x8;
-    buf[1] = 0x47;
-    /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-    LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
-
-    buf[0] = 9;
-    buf[1] = 0x35;
-    /* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
-    LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
+	buf[0] = 9;
+	buf[1] = 0x35;
+	/* iWriteRegI2C(buf , 2, STROBE_DEVICE_ID); */
+	LM3642_write_reg(LM3642_i2c_client, buf[0], buf[1]);
 
 
 
 
-    /* static int LM3642_read_reg(struct i2c_client *client, u8 reg) */
-    /* regVal0 = readReg(0); */
-    regVal0 = LM3642_read_reg(LM3642_i2c_client, 0);
+	/* static int LM3642_read_reg(struct i2c_client *client, u8 reg) */
+	/* regVal0 = readReg(0); */
+	regVal0 = LM3642_read_reg(LM3642_i2c_client, 0);
 
-    if (regVal0 == 1)
-        g_bLtVersion = 1;
-    else
-        g_bLtVersion = 0;
-
-
-    PK_DBG(" FL_Init regVal0=%d isLtVer=%d\n", regVal0, g_bLtVersion);
+	if (regVal0 == 1)
+		g_bLtVersion = 1;
+	else
+		g_bLtVersion = 0;
 
 
-    /*
-       if(mt_set_gpio_mode(FLASH_GPIO_ENT,GPIO_MODE_00)){PK_DBG("[constant_flashlight] set gpio mode failed!!\n");}
-       if(mt_set_gpio_dir(FLASH_GPIO_ENT,GPIO_DIR_OUT)){PK_DBG("[constant_flashlight] set gpio dir failed!!\n");}
-       if(mt_set_gpio_out(FLASH_GPIO_ENT,GPIO_OUT_ZERO)){PK_DBG("[constant_flashlight] set gpio failed!!\n");}
-
-       if(mt_set_gpio_mode(FLASH_GPIO_ENF,GPIO_MODE_00)){PK_DBG("[constant_flashlight] set gpio mode failed!!\n");}
-       if(mt_set_gpio_dir(FLASH_GPIO_ENF,GPIO_DIR_OUT)){PK_DBG("[constant_flashlight] set gpio dir failed!!\n");}
-       if(mt_set_gpio_out(FLASH_GPIO_ENF,GPIO_OUT_ZERO)){PK_DBG("[constant_flashlight] set gpio failed!!\n");}
-       */
+	PK_DBG(" FL_Init regVal0=%d isLtVer=%d\n", regVal0, g_bLtVersion);
 
 
+/*
+	if(mt_set_gpio_mode(FLASH_GPIO_ENT,GPIO_MODE_00)){PK_DBG("[constant_flashlight] set gpio mode failed!!\n");}
+    if(mt_set_gpio_dir(FLASH_GPIO_ENT,GPIO_DIR_OUT)){PK_DBG("[constant_flashlight] set gpio dir failed!!\n");}
+    if(mt_set_gpio_out(FLASH_GPIO_ENT,GPIO_OUT_ZERO)){PK_DBG("[constant_flashlight] set gpio failed!!\n");}
+
+	if(mt_set_gpio_mode(FLASH_GPIO_ENF,GPIO_MODE_00)){PK_DBG("[constant_flashlight] set gpio mode failed!!\n");}
+    if(mt_set_gpio_dir(FLASH_GPIO_ENF,GPIO_DIR_OUT)){PK_DBG("[constant_flashlight] set gpio dir failed!!\n");}
+    if(mt_set_gpio_out(FLASH_GPIO_ENF,GPIO_OUT_ZERO)){PK_DBG("[constant_flashlight] set gpio failed!!\n");}
+    */
 
 
-    /*	PK_DBG(" FL_Init line=%d\n", __LINE__); */
-#endif
-    return 0;
+
+
+/*	PK_DBG(" FL_Init line=%d\n", __LINE__); */
+	return 0;
 }
 
 
 int FL_Uninit(void)
 {
-    FL_Disable();
-    return 0;
+	FL_Disable();
+	return 0;
 }
 
 /*****************************************************************************
-  User interface
- *****************************************************************************/
+User interface
+*****************************************************************************/
 
 static void work_timeOutFunc(struct work_struct *data)
 {
-    FL_Disable();
-    PK_DBG("ledTimeOut_callback\n");
+	FL_Disable();
+	PK_DBG("ledTimeOut_callback\n");
 }
 
 
 
 enum hrtimer_restart ledTimeOutCallback(struct hrtimer *timer)
 {
-    schedule_work(&workTimeOut);
-    return HRTIMER_NORESTART;
+	schedule_work(&workTimeOut);
+	return HRTIMER_NORESTART;
 }
 
 static struct hrtimer g_timeOutTimer;
 void timerInit(void)
 {
-    INIT_WORK(&workTimeOut, work_timeOutFunc);
-    g_timeOutTimeMs = 1000;
-    hrtimer_init(&g_timeOutTimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-    g_timeOutTimer.function = ledTimeOutCallback;
-}
+	static int init_flag;
 
+	if (init_flag == 0) {
+		init_flag = 1;
+		INIT_WORK(&workTimeOut, work_timeOutFunc);
+		g_timeOutTimeMs = 1000;
+		hrtimer_init(&g_timeOutTimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+		g_timeOutTimer.function = ledTimeOutCallback;
+	}
+}
 
 
 static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
 {
-    int i4RetValue = 0;
-    int ior_shift;
-    int iow_shift;
-    int iowr_shift;
+	int i4RetValue = 0;
+	int ior_shift;
+	int iow_shift;
+	int iowr_shift;
 
-    ior_shift = cmd - (_IOR(FLASHLIGHT_MAGIC, 0, int));
-    iow_shift = cmd - (_IOW(FLASHLIGHT_MAGIC, 0, int));
-    iowr_shift = cmd - (_IOWR(FLASHLIGHT_MAGIC, 0, int));
-    /*	PK_DBG
-        ("LM3642 constant_flashlight_ioctl() line=%d ior_shift=%d, iow_shift=%d iowr_shift=%d arg=%d\n",
-        __LINE__, ior_shift, iow_shift, iowr_shift, (int)arg);
-        */
-    switch (cmd) {
+	ior_shift = cmd - (_IOR(FLASHLIGHT_MAGIC, 0, int));
+	iow_shift = cmd - (_IOW(FLASHLIGHT_MAGIC, 0, int));
+	iowr_shift = cmd - (_IOWR(FLASHLIGHT_MAGIC, 0, int));
+/*	PK_DBG
+	    ("LM3642 constant_flashlight_ioctl() line=%d ior_shift=%d, iow_shift=%d iowr_shift=%d arg=%d\n",
+	     __LINE__, ior_shift, iow_shift, iowr_shift, (int)arg);
+*/
+	switch (cmd) {
 
-        case FLASH_IOC_SET_TIME_OUT_TIME_MS:
-            PK_DBG("FLASH_IOC_SET_TIME_OUT_TIME_MS: %d\n", (int)arg);
-            g_timeOutTimeMs = arg;
-            break;
-
-
-        case FLASH_IOC_SET_DUTY:
-            PK_DBG("FLASHLIGHT_DUTY: %d\n", (int)arg);
-            FL_dim_duty(arg);
-            break;
+	case FLASH_IOC_SET_TIME_OUT_TIME_MS:
+		PK_DBG("FLASH_IOC_SET_TIME_OUT_TIME_MS: %d\n", (int)arg);
+		g_timeOutTimeMs = arg;
+		break;
 
 
-        case FLASH_IOC_SET_STEP:
-            PK_DBG("FLASH_IOC_SET_STEP: %d\n", (int)arg);
+	case FLASH_IOC_SET_DUTY:
+		PK_DBG("FLASHLIGHT_DUTY: %d\n", (int)arg);
+		FL_dim_duty(arg);
+		break;
 
-            break;
 
-        case FLASH_IOC_SET_ONOFF:
-            PK_DBG("FLASHLIGHT_ONOFF: %d\n", (int)arg);
-            if (arg == 1) {
+	case FLASH_IOC_SET_STEP:
+		PK_DBG("FLASH_IOC_SET_STEP: %d\n", (int)arg);
 
-                int s;
-                int ms;
+		break;
 
-                if (g_timeOutTimeMs > 1000) {
-                    s = g_timeOutTimeMs / 1000;
-                    ms = g_timeOutTimeMs - s * 1000;
-                } else {
-                    s = 0;
-                    ms = g_timeOutTimeMs;
-                }
+	case FLASH_IOC_SET_ONOFF:
+		PK_DBG("FLASHLIGHT_ONOFF: %d\n", (int)arg);
+		if (arg == 1) {
 
-                if (g_timeOutTimeMs != 0) {
-                    ktime_t ktime;
+			int s;
+			int ms;
 
-                    ktime = ktime_set(s, ms * 1000000);
-                    hrtimer_start(&g_timeOutTimer, ktime, HRTIMER_MODE_REL);
-                }
-                FL_Enable();
-            } else {
-                FL_Disable();
-                hrtimer_cancel(&g_timeOutTimer);
-            }
-            break;
-        default:
-            PK_DBG(" No such command\n");
-            i4RetValue = -EPERM;
-            break;
-    }
-    return i4RetValue;
+			if (g_timeOutTimeMs > 1000) {
+				s = g_timeOutTimeMs / 1000;
+				ms = g_timeOutTimeMs - s * 1000;
+			} else {
+				s = 0;
+				ms = g_timeOutTimeMs;
+			}
+
+			if (g_timeOutTimeMs != 0) {
+				ktime_t ktime;
+
+				ktime = ktime_set(s, ms * 1000000);
+				hrtimer_start(&g_timeOutTimer, ktime, HRTIMER_MODE_REL);
+			}
+			FL_Enable();
+		} else {
+			FL_Disable();
+			hrtimer_cancel(&g_timeOutTimer);
+		}
+		break;
+	default:
+		PK_DBG(" No such command\n");
+		i4RetValue = -EPERM;
+		break;
+	}
+	return i4RetValue;
 }
 
 
@@ -571,234 +518,79 @@ static int constant_flashlight_ioctl(unsigned int cmd, unsigned long arg)
 
 static int constant_flashlight_open(void *pArg)
 {
-    int i4RetValue = 0;
+	int i4RetValue = 0;
 
-    PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
+	PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
 
-    if (0 == strobe_Res) {
-        FL_Init();
-        timerInit();
-    }
-    PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
-    spin_lock_irq(&g_strobeSMPLock);
-
-
-    if (strobe_Res) {
-        PK_DBG(" busy!\n");
-        i4RetValue = -EBUSY;
-    } else {
-        strobe_Res += 1;
-    }
+	if (0 == strobe_Res) {
+		FL_Init();
+		timerInit();
+	}
+	PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
+	spin_lock_irq(&g_strobeSMPLock);
 
 
-    spin_unlock_irq(&g_strobeSMPLock);
-    PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
+	if (strobe_Res) {
+		PK_DBG(" busy!\n");
+		i4RetValue = -EBUSY;
+	} else {
+		strobe_Res += 1;
+	}
 
-    return i4RetValue;
+
+	spin_unlock_irq(&g_strobeSMPLock);
+	PK_DBG("constant_flashlight_open line=%d\n", __LINE__);
+
+	return i4RetValue;
 
 }
 
 
 static int constant_flashlight_release(void *pArg)
 {
-    PK_DBG(" constant_flashlight_release\n");
+	PK_DBG(" constant_flashlight_release\n");
 
-    if (strobe_Res) {
-        spin_lock_irq(&g_strobeSMPLock);
+	if (strobe_Res) {
+		spin_lock_irq(&g_strobeSMPLock);
 
-        strobe_Res = 0;
-        strobe_Timeus = 0;
+		strobe_Res = 0;
+		strobe_Timeus = 0;
 
-        /* LED On Status */
-        g_strobe_On = FALSE;
+		/* LED On Status */
+		g_strobe_On = FALSE;
 
-        spin_unlock_irq(&g_strobeSMPLock);
+		spin_unlock_irq(&g_strobeSMPLock);
 
-        FL_Uninit();
-    }
+		FL_Uninit();
+	}
 
-    PK_DBG(" Done\n");
+	PK_DBG(" Done\n");
 
-    return 0;
+	return 0;
 
 }
 
 
 FLASHLIGHT_FUNCTION_STRUCT constantFlashlightFunc = {
-    constant_flashlight_open,
-    constant_flashlight_release,
-    constant_flashlight_ioctl
+	constant_flashlight_open,
+	constant_flashlight_release,
+	constant_flashlight_ioctl
 };
 
 
 MUINT32 constantFlashlightInit(PFLASHLIGHT_FUNCTION_STRUCT *pfFunc)
 {
-    if (pfFunc != NULL)
-        *pfFunc = &constantFlashlightFunc;
-    return 0;
+	if (pfFunc != NULL)
+		*pfFunc = &constantFlashlightFunc;
+	return 0;
 }
-
+EXPORT_SYMBOL(constantFlashlightInit);
 
 
 /* LED flash control for high current capture mode*/
 ssize_t strobe_VDIrq(void)
 {
 
-    return 0;
+	return 0;
 }
 EXPORT_SYMBOL(strobe_VDIrq);
-
-
-
-static struct class *torch_class = NULL;
-static struct device *torch_dev = NULL;
-static ssize_t torch_level_show(struct device *dev,
-        struct device_attribute *attr, char *buf)
-{
-    PK_DBG("[zk torch_level_show]get torch value is:%d \n",rgt_torch_level);
-    //printk("[zk torch_level_show]get torch value is:%d \n",rgt_torch_level);
-    return sprintf(buf, "%u\n", rgt_torch_level);
-}
-//#define WRITE_REG(data, addr) ((*(volatile kal_uint32 *)(addr)) = (kal_uint32)data)
-//#define READ_REG(addr) (*(volatile kal_uint32 *)(addr))
-
-
-static ssize_t torch_level_store(struct device *dev,
-        struct device_attribute *attr, const char *buf, size_t size)
-
-{
-
-    //unsigned int ret = 0;
-    int value = simple_strtoul(buf, NULL, 0);
-    //unsigned char i = 0;
-
-    rgt_torch_level=value;
-
-    if (9 == value)//flash mode,enable flashlight
-    {
-        PK_DBG("tonny.zhu trace input value = %d\n",value);
-        //SetISINK0(true);
-        {
-            /*	mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_CAMERA_FLASH_EN_PIN_M_GPIO);
-                mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT);
-                mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ONE);
-
-                mt_set_gpio_mode(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_CAMERA_FLASH_MODE_PIN_M_GPIO);
-                mt_set_gpio_dir(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_DIR_OUT);
-                mt_set_gpio_out(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_OUT_ZERO);
-                mdelay(200);
-
-                mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_CAMERA_FLASH_EN_PIN_M_GPIO);
-                mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT);
-                mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-
-                mt_set_gpio_mode(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_CAMERA_FLASH_MODE_PIN_M_GPIO);
-                mt_set_gpio_dir(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_DIR_OUT);
-                mt_set_gpio_out(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_OUT_ZERO);
-                */
-            mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_MODE_00);  // gpio mode
-            mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT); // output
-            mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-            mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ONE);
-
-
-        }
-    }
-    else if(2 == value)
-    {
-        /*
-           SetISINK0(true);
-           mt_set_gpio_mode(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_CAMERA_FLASH_MODE_PIN_M_GPIO);
-           mt_set_gpio_dir(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_DIR_OUT);
-           mt_set_gpio_out(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_OUT_ONE);
-           */
-        mt_set_gpio_mode(GPIO_CAMERA_TORCH_EN_PIN,GPIO_MODE_00);  // gpio mode
-        mt_set_gpio_dir(GPIO_CAMERA_TORCH_EN_PIN,GPIO_DIR_OUT); // output
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ONE);
-
-    }
-    else if(1 == value)//movie mode,enable flashlight
-    {
-        //PK_DBG("tonny.zhu trace input value = %d\n",value);
-        //SetISINK0(true);
-        /*
-           mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_CAMERA_FLASH_EN_PIN_M_GPIO);
-           mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT);
-           mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-
-           mt_set_gpio_mode(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_CAMERA_FLASH_MODE_PIN_M_GPIO);
-           mt_set_gpio_dir(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_DIR_OUT);
-           mt_set_gpio_out(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_OUT_ONE);
-           */
-        mt_set_gpio_mode(GPIO_CAMERA_TORCH_EN_PIN,GPIO_MODE_00);  // gpio mode
-        mt_set_gpio_dir(GPIO_CAMERA_TORCH_EN_PIN,GPIO_DIR_OUT); // output
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ONE);
-    }
-    else//disable flashlight
-    {
-        PK_DBG("ludesuo close value = %d\n",value);
-        //SetISINK0(false);
-        /*
-           mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_CAMERA_FLASH_EN_PIN_M_GPIO);
-           mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT);
-           mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-
-           mt_set_gpio_mode(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_CAMERA_FLASH_MODE_PIN_M_GPIO);
-           mt_set_gpio_dir(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_DIR_OUT);
-           mt_set_gpio_out(GPIO_CAMERA_FLASH_MODE_PIN,GPIO_OUT_ZERO);
-           */
-        mt_set_gpio_mode(GPIO_CAMERA_FLASH_EN_PIN,GPIO_MODE_00);  // gpio mode
-        mt_set_gpio_dir(GPIO_CAMERA_FLASH_EN_PIN,GPIO_DIR_OUT); // output
-        mt_set_gpio_out(GPIO_CAMERA_FLASH_EN_PIN,GPIO_OUT_ZERO);
-
-        mt_set_gpio_mode(GPIO_CAMERA_TORCH_EN_PIN,GPIO_MODE_00);  // gpio mode
-        mt_set_gpio_dir(GPIO_CAMERA_TORCH_EN_PIN,GPIO_DIR_OUT); // output
-        mt_set_gpio_out(GPIO_CAMERA_TORCH_EN_PIN,GPIO_OUT_ZERO);
-    }
-    return size;
-}
-
-
-static DEVICE_ATTR(torch_level, 0664, torch_level_show, torch_level_store);
-// system/class/torch/torch/
-static int __init rgt_torch_level_init(void)
-{
-    //int ret = 0;
-    torch_class = class_create(THIS_MODULE, "torch");
-
-    if (IS_ERR(torch_class)) {
-        //PK_ERR("[rgt_torch_level_init] Unable to create class, err = %d\n", (int)PTR_ERR(torch_class));
-        return 0;
-    }
-
-    torch_dev = device_create(torch_class, NULL, 0, 0,"torch");
-
-    if(NULL == torch_dev){
-        //PK_ERR("[rgt_torch_level_init] device_create fail\n");
-        return 0;
-    }
-
-    device_create_file(torch_dev, &dev_attr_torch_level);
-
-    PK_DBG("[rgt_torch_level_init] Done\n");
-
-    return 0;
-}
-
-static void __exit rgt_torch_level_exit(void)
-{
-    device_remove_file(torch_dev, &dev_attr_torch_level);
-    device_unregister(torch_dev);
-    if(torch_class!=NULL)
-        class_destroy(torch_class);
-}
-
-
-module_init(rgt_torch_level_init);
-module_exit(rgt_torch_level_exit);
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("xzk>");
-MODULE_DESCRIPTION("torch value");

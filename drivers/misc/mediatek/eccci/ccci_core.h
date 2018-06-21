@@ -294,7 +294,6 @@ typedef enum {
 	OTHER_MD_NONE,
 	OTHER_MD_STOP,
 	OTHER_MD_RESET,
-	OTHER_MD_ENTER_FLIGHT_MODE,
 } OTHER_MD_OPS;
 
 struct ccci_force_assert_shm_fmt {
@@ -463,6 +462,7 @@ extern int ccci_subsys_dfo_init(void);
 /* per-modem sub-system */
 extern int switch_MD1_Tx_Power(unsigned int mode);
 extern int switch_MD2_Tx_Power(unsigned int mode);
+extern int ccci_update_rf_desense(struct ccci_modem *md, int rf_desense);
 
 #ifdef FEATURE_MTK_SWITCH_TX_POWER
 int swtp_init(int md_id);
@@ -548,10 +548,6 @@ int swtp_init(int md_id);
 #define CCCI_IOC_SET_HEADER				_IO(CCCI_IOC_MAGIC,  112) /* emcs_va */
 #define CCCI_IOC_CLR_HEADER				_IO(CCCI_IOC_MAGIC,  113) /* emcs_va */
 #define CCCI_IOC_DL_TRAFFIC_CONTROL		_IOW(CCCI_IOC_MAGIC, 119, unsigned int) /* mdlogger */
-
-#define CCCI_IOC_ENTER_DEEP_FLIGHT_ENHANCED     _IO(CCCI_IOC_MAGIC,  123) /* RILD  factory */
-#define CCCI_IOC_LEAVE_DEEP_FLIGHT_ENHANCED     _IO(CCCI_IOC_MAGIC,  124) /* RILD  factory */
-
 
 #define CCCI_IPC_MAGIC 'P' /* only for IPC user */
 /* CCCI == EEMCS */
@@ -821,6 +817,7 @@ enum {
 	MD_SW_MD1_TX_POWER_REQ = 0x110,
 	MD_SW_MD2_TX_POWER_REQ = 0x111,
 	MD_THROTTLING = 0x112, /* SW throughput throttling */
+	MD_RF_DESENSE = 0x113,
 	/* TEST_MESSAGE for IT only */
 	TEST_MSG_ID_MD2AP = 0x114,
 	TEST_MSG_ID_AP2MD = 0x115,
@@ -966,5 +963,14 @@ struct c2k_ctrl_port_msg {
 	unsigned char chan_num;
 	unsigned char option;
 } __packed; /* not necessary, but it's a good gesture, :) */
+
+//qiumeng@wind-mobi.com 20170122 begin
+#define FEATURE_MTK_SWITCH_TX_POWER
+
+#ifdef FEATURE_MTK_SWITCH_TX_POWER
+#define SWTP_COMPATIBLE_DEVICE_ID "mediatek, swtp-eint"
+extern int swtp_init(int md_id);
+#endif
+//qiumeng@wind-mobi.com 20170122 end
 
 #endif	/* __CCCI_CORE_H__ */

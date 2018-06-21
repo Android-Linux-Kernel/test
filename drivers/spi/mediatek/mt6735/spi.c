@@ -1036,6 +1036,15 @@ static irqreturn_t mt_spi_interrupt(int irq, void *dev_id)
 	reg_val = spi_readl(ms, SPI_STATUS0_REG);
 	SPI_DBG("xfer:0x%p interrupt status:%x\n", xfer, reg_val & 0x3);
 
+	if (unlikely(!msg)) {
+		SPI_DBG("msg in interrupt %d is NULL pointer.\n", reg_val & 0x3);
+		goto out;
+	}
+	if (unlikely(!xfer)) {
+		SPI_DBG("xfer in interrupt %d is NULL pointer.\n", reg_val & 0x3);
+		goto out;
+	}
+
 	chip_config = (struct mt_chip_conf *)msg->state;
 	mode = chip_config->com_mod;
 	/*clear the interrupt status bits by reading the register */
@@ -1382,7 +1391,7 @@ static int __init mt_spi_probe(struct platform_device *pdev)
 
 #endif
 	/*hardware can only connect 1 slave.if you want to multiple, using gpio CS */
-	master->num_chipselect = 3;
+	master->num_chipselect = 2;
 
 	master->mode_bits = (SPI_CPOL | SPI_CPHA);
 	master->bus_num = pdev->id;

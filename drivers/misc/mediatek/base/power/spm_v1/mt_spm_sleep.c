@@ -23,7 +23,7 @@
 #include <asm/setup.h>
 #include <linux/lockdep.h>
 #include <linux/irqchip/mt-gic.h>
-#include <mt-plat/mt_cirq.h>
+/* #include <mach/mt_cirq.h> */
 #include "mt_spm_sleep.h"
 #include "mach/mt_clkmgr.h"
 #include "mt_cpuidle.h"
@@ -1602,13 +1602,8 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
 	if (!wd_ret)
 		wd_api->wd_suspend_notify();
 
-	mt_power_gs_dump_suspend();
-#if 0
-	/* snapshot golden setting */
-	{
-		if (!is_already_snap_shot)
-			snapshot_golden_setting(__func__, 0);
-	}
+#if !defined(CONFIG_ARCH_MT6570)
+	mt_power_gs_dump_suspend(); /* TODO */
 #endif
 	/* spm_suspend_pre_process(pwrctrl); */
 	lockdep_off();

@@ -787,7 +787,7 @@ INT32 wmt_ctrl_crystal_triming_get(P_WMT_CTRL_DATA pWmtCtrlData)
 		iRet = -1;
 		return iRet;
 	}
-	if (0 == wmt_dev_patch_get(pFileName, &pNvram)) {
+	if (0 == wmt_dev_patch_get(pFileName, &pNvram, 0)) {
 		*ppBuf = (PUINT8)(pNvram)->data;
 		*pSize = (pNvram)->size;
 		gDevWmt.pNvram = pNvram;
@@ -808,7 +808,7 @@ INT32 wmt_ctrl_get_patch(P_WMT_CTRL_DATA pWmtCtrlData)
 	pFullPatchName = (PUINT8) pWmtCtrlData->au4CtrlData[1];
 	WMT_DBG_FUNC("BF get patch, pPatch(%p)\n", pPatch);
 	if ((NULL != pFullPatchName)
-	    && (0 == wmt_dev_patch_get(pFullPatchName, &pPatch))) {
+	    && (0 == wmt_dev_patch_get(pFullPatchName, &pPatch, BCNT_PATCH_BUF_HEADROOM))) {
 		/*get full name patch success */
 		WMT_DBG_FUNC("get full patch name(%s) buf(0x%p) size(%zu)\n",
 			     pFullPatchName, (pPatch)->data, (pPatch)->size);
@@ -821,7 +821,7 @@ INT32 wmt_ctrl_get_patch(P_WMT_CTRL_DATA pWmtCtrlData)
 
 	pDefPatchName = (PUINT8) pWmtCtrlData->au4CtrlData[0];
 	if ((NULL != pDefPatchName)
-	    && (0 == wmt_dev_patch_get(pDefPatchName, &pPatch))) {
+	    && (0 == wmt_dev_patch_get(pDefPatchName, &pPatch, BCNT_PATCH_BUF_HEADROOM))) {
 		WMT_DBG_FUNC("get def patch name(%s) buf(0x%p) size(%zu)\n",
 			     pDefPatchName, (pPatch)->data, (pPatch)->size);
 		WMT_DBG_FUNC("AF get patch, pPatch(%p)\n", pPatch);

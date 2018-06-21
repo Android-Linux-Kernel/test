@@ -81,9 +81,6 @@ endif
 ifeq ($(CONFIG_ARCH_MT6580), y)
     MTK_SRAM_SIZE_OPTION=1
 endif
-ifeq ($(CONFIG_ARCH_MT6570), y)
-    MTK_SRAM_SIZE_OPTION=1
-endif
 ifeq ($(CONFIG_ARCH_MT8163), y)
     MTK_SRAM_SIZE_OPTION=1
 endif
@@ -238,11 +235,6 @@ $(MODULE_NAME)-objs  += $(PLAT_OBJS)
 endif
 
 ifeq ($(CONFIG_ARCH_MT6757), y)
-PLAT_OBJS := $(PLAT_DIR)plat_priv.o
-$(MODULE_NAME)-objs  += $(PLAT_OBJS)
-endif
-
-ifeq ($(CONFIG_ARCH_MT6570), y)
 PLAT_OBJS := $(PLAT_DIR)plat_priv.o
 $(MODULE_NAME)-objs  += $(PLAT_OBJS)
 endif

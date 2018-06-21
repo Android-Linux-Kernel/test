@@ -877,7 +877,8 @@ EXPORT_SYMBOL(mt_dfs_mempll);
 int mt_dfs_general_pll(unsigned int pll_id, unsigned int target_dds)
 {
 	if ((!g_p_fh_hal_drv) || (!g_p_fh_hal_drv->mt_dfs_general_pll)) {
-		FH_MSG("[%s]: g_p_fh_hal_drv->mt_dfs_general_pll is uninitialized.", __func__);
+		FH_MSG("[%s]: g_p_fh_hal_drv->mt_dfs_general_pll is uninitialized.",
+		     __func__);
 		return 1;
 	}
 
